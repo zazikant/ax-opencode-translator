@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -458,6 +458,19 @@ export default function AxTranslatorPage() {
   });
   const [showApiKey, setShowApiKey] = useState(false);
 
+  // Server-side key availability (fetched from /api/config)
+  const [hasServerKey, setHasServerKey] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/config')
+      .then((res) => res.json())
+      .then((data) => setHasServerKey(!!data.hasServerKey))
+      .catch(() => setHasServerKey(false));
+  }, []);
+
+  // Whether a usable API key is available (server key or user-provided key)
+  const hasApiKey = hasServerKey || apiKey.trim().length > 0;
+
   // Persist API key to sessionStorage whenever it changes
   const handleApiKeyChange = (value: string) => {
     setApiKey(value);
@@ -472,7 +485,7 @@ export default function AxTranslatorPage() {
 
   // Translation input state
   const [inputText, setInputText] = useState('');
-  const [sourceLanguage, setSourceLanguage] = useState('auto');
+  const [sourceLanguage, setSourceLanguage] = useState('en');
   const [targetLanguage, setTargetLanguage] = useState('en');
 
   // Translation output state
@@ -502,7 +515,7 @@ export default function AxTranslatorPage() {
 
   const handleTranslate = useCallback(async () => {
     if (!inputText.trim()) return;
-    if (!apiKey.trim()) {
+    if (!hasApiKey) {
       setError('Please enter your NVIDIA API key');
       return;
     }
@@ -540,7 +553,7 @@ export default function AxTranslatorPage() {
               text: chunks[i],
               sourceLanguage,
               targetLanguage,
-              apiKey,
+              ...(apiKey.trim() ? { apiKey } : {}),
             }),
           });
 
@@ -601,7 +614,7 @@ export default function AxTranslatorPage() {
             text: inputText,
             sourceLanguage,
             targetLanguage,
-            apiKey,
+            ...(apiKey.trim() ? { apiKey } : {}),
           }),
         });
 
@@ -648,7 +661,7 @@ export default function AxTranslatorPage() {
       setCurrentStage('');
       setChunkProgress(null);
     }
-  }, [inputText, sourceLanguage, targetLanguage, apiKey, isLargeInput]);
+  }, [inputText, sourceLanguage, targetLanguage, apiKey, isLargeInput, hasApiKey]);
 
   // ─── Add to History ──────────────────────────────────────────────────
 
@@ -758,24 +771,33 @@ export default function AxTranslatorPage() {
                 <div className="flex items-center gap-2">
                   <Key className="size-4 text-muted-foreground" />
                   <CardTitle className="text-base">NVIDIA API Key</CardTitle>
+                  {hasServerKey && !apiKey.trim() && (
+                    <Badge variant="default" className="gap-1 text-xs bg-emerald-600 hover:bg-emerald-700">
+                      <CheckCircle className="size-3" />
+                      Server Key Active
+                    </Badge>
+                  )}
                 </div>
                 <CardDescription>
-                  Your API key is saved in your browser session (survives refresh, cleared on tab close). Get one from{' '}
-                  <a
-                    href="https://build.nvidia.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary underline underline-offset-4 hover:text-primary/80"
-                  >
-                    build.nvidia.com
-                  </a>
+                  {hasServerKey
+                    ? 'A server-side API key is available and will be used by default. Enter your own key below to override it.'
+                    : <>No server API key configured. Enter your key below — it is saved in your browser session (survives refresh, cleared on tab close). Get one from{' '}
+                    <a
+                      href="https://build.nvidia.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline underline-offset-4 hover:text-primary/80"
+                    >
+                      build.nvidia.com
+                    </a></>
+                  }
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="relative">
                   <Input
                     type={showApiKey ? 'text' : 'password'}
-                    placeholder="nvapi-..."
+                    placeholder={hasServerKey ? 'Override server key (optional)' : 'nvapi-...'}
                     value={apiKey}
                     onChange={(e) => handleApiKeyChange(e.target.value)}
                     className="pr-10 font-mono"
@@ -789,6 +811,11 @@ export default function AxTranslatorPage() {
                     {showApiKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </Button>
                 </div>
+                {hasServerKey && apiKey.trim() && (
+                  <p className="text-xs text-amber-600 mt-2">
+                    Your custom key will override the server key for this session.
+                  </p>
+                )}
               </CardContent>
             </Card>
 
@@ -882,7 +909,7 @@ export default function AxTranslatorPage() {
                   )}
                   <Button
                     onClick={handleTranslate}
-                    disabled={isTranslating || !inputText.trim() || !apiKey.trim()}
+                    disabled={isTranslating || !inputText.trim() || !hasApiKey}
                     className="w-full gap-2"
                     size="lg"
                   >
