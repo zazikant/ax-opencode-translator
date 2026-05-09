@@ -60,14 +60,16 @@ function estimateTokens(text: string): number {
 
 /**
  * Calculate max_tokens for the output based on input length.
- * GLM 5.1 supports large context; we give generous output budget.
- * Translation length ≈ input length × 1.5 (safety margin for longer target languages).
- * Minimum 2048, maximum 16384.
+ * GLM 5.1 is a thinking model — it uses reasoning tokens before the visible
+ * response. We give a generous output budget to ensure the actual text
+ * has room after the internal reasoning phase.
+ * Translation length ≈ input length × 3 (thinking + output safety margin).
+ * Minimum 4096, maximum 16384.
  */
 function calculateMaxTokens(inputText: string): number {
   const inputTokens = estimateTokens(inputText);
-  const outputTokens = Math.ceil(inputTokens * 1.5);
-  return Math.max(2048, Math.min(16384, outputTokens));
+  const outputTokens = Math.ceil(inputTokens * 3);
+  return Math.max(4096, Math.min(16384, outputTokens));
 }
 
 // ─── Echo Detection ─────────────────────────────────────────────────────────
@@ -204,7 +206,7 @@ Translation (${input.targetLanguage}):
 ${translatedText}
 """`;
 
-  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 1024, 0.1);
+  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 4096, 0.1);
 
   try {
     const jsonMatch = result.match(/\{[\s\S]*\}/);

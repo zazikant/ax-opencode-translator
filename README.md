@@ -77,7 +77,7 @@ Translate text into clean, understandable language using a DSPy-inspired pipelin
 
 - **Frontend**: Next.js 16, React 19, shadcn/ui, Tailwind CSS
 - **Backend**: Next.js API Routes with embedded pipeline
-- **LLM**: GLM 5.1 via OpenCode (`opencode.ai`) — Anthropic Messages API compatible
+- **LLM**: GLM 5.1 via OpenCode (`opencode.ai`) — OpenAI Chat Completions API compatible
 
 ## Getting Started
 
@@ -143,7 +143,7 @@ src/
 │   └── api/translate/
 │       └── route.ts          # API route (calls pipeline)
 ├── lib/
-│   ├── llm-client.ts           # GLM 5.1 API client (Anthropic Messages compatible)
+│   ├── llm-client.ts           # GLM 5.1 API client (OpenAI Chat Completions compatible)
 │   └── translation-pipeline.ts  # DSPy-like pipeline
 └── components/ui/            # shadcn/ui components
 ```

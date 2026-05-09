@@ -1,13 +1,17 @@
 /**
- * GLM 5.1 API Client — Anthropic Messages-compatible interface
+ * GLM 5.1 API Client — OpenAI Chat Completions interface
  *
- * Calls the GLM 5.1 model via the Anthropic-compatible messages endpoint.
- * Uses system + user message format (Anthropic Messages API).
+ * Calls the GLM 5.1 model via the OpenAI-compatible chat completions endpoint.
+ * Uses system + user message format (OpenAI Chat Completions API).
  *
  * Base URL: https://opencode.ai/zen/go
  * Default model: glm-5.1
- * Endpoint: /v1/messages (Anthropic-compatible)
- * Auth: x-api-key header
+ * Endpoint: /v1/chat/completions (OpenAI-compatible)
+ * Auth: Authorization: Bearer header
+ *
+ * Note: GLM 5.1 is a thinking model — it uses reasoning_content internally
+ * before producing the visible content. We allocate generous max_tokens
+ * to ensure the actual response has room after the thinking phase.
  */
 
 const LLM_BASE_URL = 'https://opencode.ai/zen/go';
@@ -30,53 +34,34 @@ export interface LLMChatResponse {
   content: string;
   model: string;
   usage?: {
-    input_tokens: number;
-    output_tokens: number;
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
   };
 }
 
 /**
- * Extract text content from Anthropic-compatible response.
- * The response content array may contain both "thinking" and "text" blocks;
- * we only extract the "text" blocks.
- */
-function extractTextFromContent(content: Array<{ type: string; text?: string }>): string {
-  const textBlocks = content.filter(block => block.type === 'text' && block.text);
-  return textBlocks.map(block => block.text!).join('\n');
-}
-
-/**
- * Call GLM 5.1's Anthropic-compatible messages API.
- * API key is always passed via options.apiKey.
+ * Call GLM 5.1's OpenAI-compatible chat completions API.
+ * API key is always passed via options.apiKey as Bearer token.
  */
 export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMChatResponse> {
   const model = options.model || DEFAULT_MODEL;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 120_000); // 2 min timeout
 
-  // Separate system message from other messages for the Anthropic format
-  const systemMessage = options.messages.find(m => m.role === 'system')?.content;
-  const nonSystemMessages = options.messages.filter(m => m.role !== 'system');
-
   try {
-    const body: Record<string, unknown> = {
-      model,
-      messages: nonSystemMessages,
-      max_tokens: options.maxTokens ?? 2048,
-      temperature: options.temperature ?? 0.7,
-    };
-    if (systemMessage) {
-      body.system = systemMessage;
-    }
-
-    const response = await fetch(`${LLM_BASE_URL}/v1/messages`, {
+    const response = await fetch(`${LLM_BASE_URL}/v1/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': options.apiKey,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${options.apiKey}`,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        model,
+        messages: options.messages,
+        max_tokens: options.maxTokens ?? 4096,
+        temperature: options.temperature ?? 0.7,
+      }),
       signal: controller.signal,
     });
 
@@ -88,7 +73,8 @@ export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMCha
     }
 
     const data = await response.json();
-    const content = extractTextFromContent(data.content || []);
+    const content = data.choices?.[0]?.message?.content || '';
+
     if (!content) {
       throw new Error('GLM API returned empty response');
     }
@@ -110,13 +96,17 @@ export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMCha
 /**
  * Convenience: Call with system prompt + user content + API key.
  * This is the primary way the pipeline calls the LLM.
+ *
+ * GLM 5.1 is a thinking model — it uses reasoning tokens before the visible
+ * response. We use a minimum of 4096 max_tokens to ensure the actual text
+ * output has room after the internal reasoning phase.
  */
 export async function callLLM(
   systemPrompt: string,
   userContent: string,
   apiKey: string,
   model?: string,
-  maxTokens: number = 2048,
+  maxTokens: number = 4096,
   temperature: number = 0.3
 ): Promise<string> {
   const modelName = model || DEFAULT_MODEL;
@@ -124,17 +114,16 @@ export async function callLLM(
   const timeout = setTimeout(() => controller.abort(), 120_000);
 
   try {
-    const response = await fetch(`${LLM_BASE_URL}/v1/messages`, {
+    const response = await fetch(`${LLM_BASE_URL}/v1/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: modelName,
-        system: systemPrompt,
         messages: [
+          { role: 'system', content: systemPrompt },
           { role: 'user', content: userContent },
         ],
         max_tokens: maxTokens,
@@ -151,7 +140,8 @@ export async function callLLM(
     }
 
     const data = await response.json();
-    const content = extractTextFromContent(data.content || []);
+    const content = data.choices?.[0]?.message?.content || '';
+
     if (!content) {
       console.error('[GLM] Empty response. Full data:', JSON.stringify(data).substring(0, 500));
       throw new Error('GLM API returned empty response');
