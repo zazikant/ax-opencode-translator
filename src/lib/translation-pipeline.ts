@@ -122,28 +122,34 @@ async function translateText(input: TranslationRequest, isRetry: boolean = false
 
   if (isRetry) {
     // More forceful prompt for retries — explicitly say NOT to echo
-    systemPrompt = `You are a professional translator. Your task is to TRANSLATE the given text from ${srcLabel} into ${targetLabel}.
+    systemPrompt = `You are an expert translator and text transformation specialist. Your task is to TRANSLATE the given text from ${srcLabel} into ${targetLabel}.
 
-CRITICAL INSTRUCTION: You MUST output the text IN ${targetLabel.toUpperCase()}. Do NOT output the same text in the original language. This is a translation task, not a repetition task. The previous attempt returned the original text unchanged — you must actually translate it this time.
+CRITICAL INSTRUCTION: You MUST output the text IN ${targetLabel.toUpperCase()}. Do NOT output the same text in the original language. The previous attempt returned the original text unchanged — you must actually translate it this time.
 
-Rules:
-- Produce a clean, natural, and understandable translation in ${targetLabel}
+Output guidelines:
+- Produce a polished, natural, and understandable translation in ${targetLabel}
 - Preserve the original meaning exactly — do not add, remove, or change information
 - Use natural phrasing that a native speaker of ${targetLabel} would use
-- Output ONLY the translated text in ${targetLabel}, nothing else.`;
+- If the input is structured (headings, bullets, lists), preserve and enhance that structure in the output
+- Use argumentative connectives (therefore, consequently, moreover, furthermore, unlike, whereas) for logical flow
+- For technical terms, explain what they are and why they are significant where context allows
+- Make the output rich, detailed, and well-structured — not a flat paragraph`;
 
     userContent = `Translate the following text from ${srcLabel} to ${targetLabel}. The output must be in ${targetLabel}:\n\n${input.text}`;
   } else {
-    systemPrompt = `You are a professional translator. Translate the given text from ${srcLabel} to ${targetLabel}.
+    systemPrompt = `You are an expert translator and text transformation specialist. Translate the given text from ${srcLabel} to ${targetLabel}.
 
-Rules:
-- Produce a clean, natural, and understandable translation
+Output guidelines:
+- Produce a polished, natural, and understandable translation
 - Preserve the original meaning exactly — do not add, remove, or change information
 - Use natural phrasing that a native speaker would use
 - Maintain the same tone and register (formal, informal, technical, etc.)
 - If the text contains idioms, translate them to equivalent expressions in the target language
 - If the text contains technical terms, use the standard terminology in the target language
-- Output ONLY the translated text in ${targetLabel}, nothing else
+- Preserve and enhance structure: if the input has headings, subheadings, bullet points, or numbered lists, maintain them in the output using markdown formatting
+- Use argumentative connectives (therefore, consequently, moreover, furthermore, unlike, whereas) for logical flow
+- For each technical term, tool, or technology mentioned, briefly explain what it is and why it was chosen where context allows
+- Make the output rich, detailed, and well-structured — produce a comprehensive, polished result, not a flat paragraph
 - Do NOT output the original text — you must output the translation`;
 
     userContent = `Translate the following text from ${srcLabel} to ${targetLabel}. The output must be in ${targetLabel}:\n\n${input.text}`;
@@ -156,7 +162,8 @@ Rules:
 
   const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, maxTokens, 0.3);
 
-  // Strip any markdown code blocks or quotes the LLM might add
+  // Strip any wrapping code blocks or quotes the LLM might add,
+  // but preserve internal markdown formatting (headings, bullets, bold, etc.)
   const cleaned = result
     .replace(/^```[\w]*\n?/m, '')
     .replace(/\n?```$/m, '')
@@ -177,13 +184,16 @@ async function validateTranslation(
   input: TranslationRequest,
   translatedText: string
 ): Promise<{ isValid: boolean; qualityScore: number; issues: string[]; suggestion?: string }> {
-  const systemPrompt = `You are a translation quality reviewer. Evaluate the provided translation and respond in JSON format.
+  const systemPrompt = `You are an expert translation quality reviewer. Evaluate the provided translation and respond in JSON format.
 
 Evaluate on these criteria:
 1. Accuracy: Does the translation preserve the original meaning?
 2. Fluency: Is the translation natural and well-formed in the target language?
 3. Completeness: Is any information missing or added?
 4. Terminology: Are technical terms translated correctly?
+5. Structure: If the source has structure (headings, bullets, lists), does the translation preserve and enhance it with proper markdown formatting?
+6. Depth: Is the translation rich and substantive, or is it a flat/shallow paraphrase? A good translation should expand telegraphic notes into full structured content, explain technical terms, and use argumentative connectives for logical flow.
+7. Polish: Is the style polished and professional? Does it use connectives like "therefore", "consequently", "moreover", "unlike", "whereas" for logical flow?
 
 Respond in this exact JSON format:
 {
@@ -193,7 +203,13 @@ Respond in this exact JSON format:
   "suggestion": "optional improvement suggestion"
 }
 
-If the translation is good enough for practical use, set isValid to true even if minor improvements are possible.`;
+Scoring guidance:
+- 90-100: Excellent — accurate, fluent, well-structured, rich, polished with connectives
+- 70-89: Good — accurate and fluent but may lack depth, structure, or polish
+- 50-69: Acceptable — conveys meaning but is flat, shallow, or poorly structured
+- Below 50: Poor — inaccurate, incomplete, or echo-like
+
+Set isValid to true ONLY if qualityScore >= 70. Below 70, set isValid to false with specific improvement issues.`;
 
   const srcLabel = input.sourceLanguage === 'auto' ? 'detected' : input.sourceLanguage;
   const userContent = `Source text (${srcLabel}):
@@ -234,9 +250,16 @@ async function refineTranslation(
 ): Promise<string> {
   const issuesList = issues.map(i => `- ${i}`).join('\n');
 
-  const systemPrompt = `You are a professional translator refining a translation.
+  const systemPrompt = `You are an expert translator and text transformation specialist refining a translation.
 Fix ALL the issues identified while keeping the rest of the translation unchanged.
-Output ONLY the improved translation, nothing else.`;
+
+Refinement guidelines:
+- Preserve and enhance structure: use markdown headings, subheadings, bullet points, and numbered lists where appropriate
+- Add depth: expand telegraphic or terse notes into full, substantive content
+- For technical terms, briefly explain what they are and why they matter
+- Use argumentative connectives (therefore, consequently, moreover, furthermore, unlike, whereas) for logical flow
+- Ensure the result is polished, professional, and richly detailed
+- Output the complete improved translation with all fixes applied, nothing else`;
 
   const srcLabel = input.sourceLanguage === 'auto' ? 'detected' : input.sourceLanguage;
   const userContent = `Source text (${srcLabel}):
@@ -254,6 +277,7 @@ ${issuesList}`;
 
   const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, calculateMaxTokens(translatedText), 0.2);
 
+  // Strip wrapping code blocks but preserve internal markdown formatting
   return result
     .replace(/^```[\w]*\n?/m, '')
     .replace(/\n?```$/m, '')
