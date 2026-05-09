@@ -2,16 +2,12 @@
  * GLM 5.1 API Client — OpenAI Chat Completions interface
  *
  * Calls the GLM 5.1 model via the OpenAI-compatible chat completions endpoint.
- * Uses system + user message format (OpenAI Chat Completions API).
+ * Uses system + user message format (same as OpenAI SDK).
  *
  * Base URL: https://opencode.ai/zen/go
  * Default model: glm-5.1
  * Endpoint: /v1/chat/completions (OpenAI-compatible)
  * Auth: Authorization: Bearer header
- *
- * Note: GLM 5.1 is a thinking model — it uses reasoning_content internally
- * before producing the visible content. We allocate generous max_tokens
- * to ensure the actual response has room after the thinking phase.
  */
 
 const LLM_BASE_URL = 'https://opencode.ai/zen/go';
@@ -59,8 +55,9 @@ export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMCha
       body: JSON.stringify({
         model,
         messages: options.messages,
-        max_tokens: options.maxTokens ?? 4096,
+        max_tokens: options.maxTokens ?? 2048,
         temperature: options.temperature ?? 0.7,
+        stream: false,
       }),
       signal: controller.signal,
     });
@@ -96,17 +93,13 @@ export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMCha
 /**
  * Convenience: Call with system prompt + user content + API key.
  * This is the primary way the pipeline calls the LLM.
- *
- * GLM 5.1 is a thinking model — it uses reasoning tokens before the visible
- * response. We use a minimum of 4096 max_tokens to ensure the actual text
- * output has room after the internal reasoning phase.
  */
 export async function callLLM(
   systemPrompt: string,
   userContent: string,
   apiKey: string,
   model?: string,
-  maxTokens: number = 4096,
+  maxTokens: number = 2048,
   temperature: number = 0.3
 ): Promise<string> {
   const modelName = model || DEFAULT_MODEL;
@@ -128,6 +121,7 @@ export async function callLLM(
         ],
         max_tokens: maxTokens,
         temperature,
+        stream: false,
       }),
       signal: controller.signal,
     });
