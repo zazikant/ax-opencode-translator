@@ -148,6 +148,7 @@ CRITICAL RULES:
 - When the user asks for argumentative connectives and logical flow — use them: furthermore, consequently, therefore, however, in contrast, moreover, nevertheless, accordingly.
 - When the user asks for explanations of technical terms — provide detailed explanations of what each term means and why it was chosen.
 - When the user asks for a polished or formal style — write with professional, academic-quality prose.
+- When the user asks for "telegraphic speech" — expand each keyword/phrase into a brief grammatical clause (with articles, verb conjugations) and join them with semicolons into a single flowing sentence. Do NOT use periods or line breaks between clauses. Format: "Subject verb object; verb adjective; verb adverb; action phrase."
 - Preserve ALL facts and information from the input. Do not add fabricated information.
 - Output ONLY the transformed text. No preamble, no meta-commentary, no labels like "Here is the output:".`;
 
@@ -163,6 +164,7 @@ RULES:
 - When the user asks for structured output (headings, bullet points, sections), produce them — never output a flat paragraph.
 - When the user asks for connectives and logical flow, use them explicitly.
 - When the user asks for explanations of terms, provide them.
+- When the user asks for "telegraphic speech" — expand each keyword into a brief grammatical clause with articles and verb conjugations, joined by semicolons into one flowing sentence. No periods or line breaks between clauses.
 - Output ONLY the transformed text. No preamble or meta-commentary.`;
 
     userContent = input.text;
