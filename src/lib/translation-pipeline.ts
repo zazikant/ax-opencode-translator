@@ -115,10 +115,48 @@ async function translateText(input: TranslationRequest, isRetry: boolean = false
   const srcLabel = input.sourceLanguage === 'auto' ? 'the detected source language' : input.sourceLanguage;
   const targetLabel = input.targetLanguage;
 
+  // Detect same-language mode (en→en, hi→hi, etc.) — this is text transformation, not translation
+  const isSameLanguage = input.sourceLanguage === input.targetLanguage ||
+    (input.sourceLanguage === 'auto' && input.targetLanguage === 'en'); // auto likely = en for this app
+
   let systemPrompt: string;
   let userContent: string;
 
-  if (isRetry) {
+  if (isSameLanguage && !isRetry) {
+    // ─── Same-Language Text Transformation Mode ─────────────────────────────
+    // When source and target are the same language, the user is not "translating"
+    // but rather transforming/enhancing text (e.g., converting telegraphic notes
+    // into a structured essay, compressing to keywords, extracting action items).
+    // The user's input text contains embedded instructions that MUST be followed.
+    systemPrompt = `You are an expert text transformation assistant. The user provides text that contains INSTRUCTIONS followed by content. Your job is to follow those instructions precisely and produce the requested output.
+
+CRITICAL RULES:
+- Read the user's text carefully. It contains transformation instructions (e.g., "Convert telegraphic notes into a formal essay", "Compress to keywords", "Extract action items", etc.)
+- Follow ALL instructions in the user's text exactly — formatting, style, structure, headings, bullet points, connectives, etc.
+- When the user asks for headings, subheadings, bullet points, or structured output — YOU MUST produce them. Never output a single flat paragraph when structured output is requested.
+- When the user asks for argumentative connectives and logical flow — use them: furthermore, consequently, therefore, however, in contrast, moreover, nevertheless, accordingly.
+- When the user asks for explanations of technical terms — provide detailed explanations of what each term means and why it was chosen.
+- When the user asks for a polished or formal style — write with professional, academic-quality prose.
+- Preserve ALL facts and information from the input. Do not add fabricated information.
+- Output ONLY the transformed text. No preamble, no meta-commentary, no labels like "Here is the output:".`;
+
+    userContent = input.text;
+  } else if (isSameLanguage && isRetry) {
+    // ─── Same-Language Retry ────────────────────────────────────────────────
+    systemPrompt = `You are an expert text transformation assistant. The user provides text that contains INSTRUCTIONS followed by content. Your job is to follow those instructions precisely and produce the requested output.
+
+CRITICAL: The previous attempt produced output that was too similar to the input or did not follow the user's transformation instructions. You MUST actually transform the text according to the instructions.
+
+RULES:
+- Read the user's text carefully and follow ALL embedded instructions precisely.
+- When the user asks for structured output (headings, bullet points, sections), produce them — never output a flat paragraph.
+- When the user asks for connectives and logical flow, use them explicitly.
+- When the user asks for explanations of terms, provide them.
+- Output ONLY the transformed text. No preamble or meta-commentary.`;
+
+    userContent = input.text;
+  } else if (isRetry) {
+    // ─── Cross-Language Retry ───────────────────────────────────────────────
     // More forceful prompt for retries — explicitly say NOT to echo
     systemPrompt = `You are a professional translator. Your task is to TRANSLATE the given text from ${srcLabel} into ${targetLabel}.
 
@@ -132,6 +170,7 @@ Rules:
 
     userContent = `Translate the following text from ${srcLabel} to ${targetLabel}. The output must be in ${targetLabel}:\n\n${input.text}`;
   } else {
+    // ─── Cross-Language Translation (default, matches ax-translator) ───────
     systemPrompt = `You are a professional translator. Translate the given text from ${srcLabel} to ${targetLabel}.
 
 Rules:
@@ -152,7 +191,9 @@ Rules:
   const maxTokens = calculateMaxTokens(input.text);
   console.log(`[Pipeline] Dynamic max_tokens: ${maxTokens} (input est. ${estimateTokens(input.text)} tokens)`);
 
-  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, maxTokens, 0.3);
+  // Use higher temperature for same-language transformation (more creative/structured output)
+  const temperature = isSameLanguage ? 0.5 : 0.3;
+  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, maxTokens, temperature);
 
   // Strip any markdown code blocks or quotes the LLM might add
   const cleaned = result
@@ -175,7 +216,29 @@ async function validateTranslation(
   input: TranslationRequest,
   translatedText: string
 ): Promise<{ isValid: boolean; qualityScore: number; issues: string[]; suggestion?: string }> {
-  const systemPrompt = `You are a translation quality reviewer. Evaluate the provided translation and respond in JSON format.
+  const isSameLanguage = input.sourceLanguage === input.targetLanguage ||
+    (input.sourceLanguage === 'auto' && input.targetLanguage === 'en');
+
+  const systemPrompt = isSameLanguage
+    ? `You are a text transformation quality reviewer. The user provided text with transformation instructions (e.g., convert to essay, compress to keywords, extract items). Evaluate whether the output correctly follows those instructions.
+
+Evaluate on these criteria:
+1. Instruction adherence: Did the output follow ALL the user's instructions (format, style, structure)?
+2. Structure: Does the output have the requested headings, subheadings, bullet points, or sections? (Flat paragraphs when structured output was requested = FAIL)
+3. Completeness: Is any information from the input missing?
+4. Quality: Is the output well-written with proper connectives, logical flow, and polish as requested?
+5. Depth: Are technical terms explained when requested? Are arguments developed with reasoning?
+
+Respond in this exact JSON format:
+{
+  "isValid": true/false,
+  "qualityScore": 0-100,
+  "issues": ["issue1", "issue2"],
+  "suggestion": "optional improvement suggestion"
+}
+
+Be strict: if the output is a flat paragraph when the user asked for structured output with headings/bullet points, set isValid to false and qualityScore below 50.`
+    : `You are a translation quality reviewer. Evaluate the provided translation and respond in JSON format.
 
 Evaluate on these criteria:
 1. Accuracy: Does the translation preserve the original meaning?
@@ -204,7 +267,8 @@ Translation (${input.targetLanguage}):
 ${translatedText}
 """`;
 
-  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 1024, 0.1);
+  // GLM 5.1 is a thinking model — needs at least 2048 max_tokens for reasoning + output
+  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 2048, 0.1);
 
   try {
     const jsonMatch = result.match(/\{[\s\S]*\}/);
@@ -231,8 +295,18 @@ async function refineTranslation(
   issues: string[]
 ): Promise<string> {
   const issuesList = issues.map(i => `- ${i}`).join('\n');
+  const isSameLanguage = input.sourceLanguage === input.targetLanguage ||
+    (input.sourceLanguage === 'auto' && input.targetLanguage === 'en');
 
-  const systemPrompt = `You are a professional translator refining a translation.
+  const systemPrompt = isSameLanguage
+    ? `You are an expert text transformation assistant refining output to better match the user's instructions.
+Fix ALL the issues identified while preserving what already works.
+
+CRITICAL: If the user asked for structured output (headings, bullet points, sections) and the current output is a flat paragraph, you MUST restructure it with proper headings, subheadings, bullet points, and sections.
+If the user asked for argumentative connectives, add them: furthermore, consequently, therefore, however, moreover, nevertheless.
+If the user asked for explanations of terms, add detailed explanations.
+Output ONLY the improved transformed text, nothing else.`
+    : `You are a professional translator refining a translation.
 Fix ALL the issues identified while keeping the rest of the translation unchanged.
 Output ONLY the improved translation, nothing else.`;
 
