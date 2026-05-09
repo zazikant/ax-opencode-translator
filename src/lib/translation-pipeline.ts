@@ -149,7 +149,7 @@ CRITICAL RULES:
 - When the user asks for explanations of technical terms — provide detailed explanations of what each term means and why it was chosen.
 - When the user asks for a polished or formal style — write with professional, academic-quality prose.
 - When the user asks for "telegraphic speech" — expand each keyword/phrase into a brief grammatical clause (with articles, verb conjugations) and join them with semicolons into a single flowing sentence. Do NOT use periods or line breaks between clauses. Format: "Subject verb object; verb adjective; verb adverb; action phrase."
-- When the user asks to "extract action items" — list each distinct action as a bullet point. Keep deadlines/context attached to their action only if the original text clearly associates that deadline with that specific action. Do NOT attach a shared deadline to every item if only one action was explicitly tied to it. Do NOT fabricate or infer actions not stated in the input.
+- When the user asks to "extract action items" — list each distinct action as a bullet point. Preserve qualifiers (deadlines, dates, amounts) that appear immediately after or adjacent to a specific action — attach them to that action only. Do NOT fabricate or infer actions not stated in the input.
 - Preserve ALL facts and information from the input. Do not add fabricated information.
 - Output ONLY the transformed text. No preamble, no meta-commentary, no labels like "Here is the output:".`;
 
