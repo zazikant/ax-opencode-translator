@@ -63,18 +63,22 @@ function estimateTokens(text: string): number {
  * GLM 5.1 is a thinking model — it uses tokens for internal reasoning before
  * producing output. We must allocate enough tokens for BOTH reasoning + output.
  *
+ * IMPORTANT: On Vercel, each LLM call must complete within 50s (leaving buffer
+ * for the 60s maxDuration). Higher max_tokens = longer generation time.
+ * We cap at 8192 to keep response times reasonable.
+ *
  * For same-language transformation (en→en), output can be 3-5× the input
  * (telegraphic notes → structured essay with explanations).
  * For cross-language translation, output ≈ input × 1.5.
  *
- * Minimum 4096 (thinking models need at least this much), maximum 16384.
+ * Minimum 2048, maximum 8192.
  */
 function calculateMaxTokens(inputText: string, isSameLanguage: boolean = false): number {
   const inputTokens = estimateTokens(inputText);
   // Same-language transformation produces much longer output (3-5× expansion)
   const multiplier = isSameLanguage ? 4 : 1.5;
   const outputTokens = Math.ceil(inputTokens * multiplier);
-  return Math.max(4096, Math.min(16384, outputTokens));
+  return Math.max(2048, Math.min(8192, outputTokens));
 }
 
 // ─── Echo Detection ─────────────────────────────────────────────────────────
