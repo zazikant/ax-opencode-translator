@@ -6,6 +6,15 @@ export const maxDuration = 60;
 
 import { runTranslationPipeline, runFastTranslation } from '@/lib/translation-pipeline';
 
+// ─── Token Estimation (mirrors frontend) ──────────────────────────────────────
+// Rough: 1 token ≈ 4 chars for English, 2 chars for CJK
+
+function estimateTokens(text: string): number {
+  const cjkChars = (text.match(/[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g) || []).length;
+  const otherChars = text.length - cjkChars;
+  return Math.ceil(cjkChars / 2 + otherChars / 4);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -29,20 +38,40 @@ export async function POST(request: NextRequest) {
       model: model || undefined,
     };
 
-    // Choose pipeline mode:
-    // - fast=true → skip validate/refine (for Vercel Hobby / speed)
-    // - fast=false → full translate→validate→refine pipeline
-    // - Default: fast mode on Vercel (no env key = likely Hobby), full pipeline if OPENCODE_API_KEY is set
-    const useFastMode = fast === true || (fast === undefined && !process.env.OPENCODE_API_KEY);
+    // ─── Pipeline Mode Selection ───────────────────────────────────────────
+    // GLM 5.1 is a thinking model — each LLM call takes 15-30s.
+    // Full pipeline (translate → validate → refine) = 2-5 sequential calls.
+    // Vercel Pro maxDuration = 60s, so we must be smart about which mode to use.
+    //
+    // Strategy:
+    // 1. fast=true (explicit) → always use fast mode
+    // 2. fast=false (explicit) → always use full pipeline
+    // 3. Default (fast undefined):
+    //    - Large input (>1500 tokens) → fast mode (single call fits in 60s)
+    //    - Small input → full pipeline (quality validation worth the time)
+    //    - No env key (likely Vercel Hobby) → fast mode
+
+    const inputTokens = estimateTokens(text);
+    const LARGE_INPUT_THRESHOLD = 1500; // tokens — above this, full pipeline will likely timeout
+
+    let useFastMode: boolean;
+    if (fast === true) {
+      useFastMode = true;
+    } else if (fast === false) {
+      useFastMode = false;
+    } else {
+      // Auto-decide: fast for large inputs, full pipeline for small
+      useFastMode = inputTokens > LARGE_INPUT_THRESHOLD || !process.env.OPENCODE_API_KEY;
+    }
 
     if (useFastMode) {
-      console.log('[Translate API] Using FAST mode (translate only)');
+      console.log(`[Translate API] FAST mode (input: ~${inputTokens} tokens, threshold: ${LARGE_INPUT_THRESHOLD})`);
       const result = await runFastTranslation(input);
       return NextResponse.json(result);
     }
 
     // Full pipeline: translate → validate → refine
-    console.log('[Translate API] Using FULL pipeline (translate → validate → refine)');
+    console.log(`[Translate API] FULL pipeline (input: ~${inputTokens} tokens)`);
     const result = await runTranslationPipeline(input);
     return NextResponse.json(result);
   } catch (error: unknown) {
@@ -52,7 +81,7 @@ export async function POST(request: NextRequest) {
     // If timeout error, suggest fast mode
     if (message.includes('timeout') || message.includes('timed out')) {
       return NextResponse.json(
-        { error: 'Translation timed out. Try using fast mode (add "fast": true to request) or set OPENCODE_API_KEY env var on Vercel Pro.' },
+        { error: 'Translation timed out. Try using fast mode (add "fast": true to request) or use shorter text.' },
         { status: 504 }
       );
     }
