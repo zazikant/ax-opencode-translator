@@ -314,6 +314,30 @@ Future of humanity hangs in the balance.`,
     answer: null,
   },
   {
+    title: 'Expanded Telegraphic Speech (Causal Chains)',
+    prompt: `Convert telegraphic notes into an expanded, multi-line telegraphic speech — each source idea spawns 3–5 new causal chains, maintaining 6–8 words per line, semicolon-separated, no filler. Preserve Facts, headings, subheadings, bullet points. Add Argumentative connectives and logical flow. Style polished.
+
+Input::
+
+Silence. Shadows. Heartbeat. Surrender.
+
+Answer:
+
+Silence blankets the hall; tension intensifies; listeners await;
+Silence suppresses noise; thoughts sharpen; decisions crystallize;
+Silence forces reflection; doubts surface; resolve strengthens;
+Shadows creep across walls; fear deepens; courage flickers;
+Shadows mask movement; suspicion rises; vigilance heightens;
+Shadows conceal truth; inquiry persists; answers emerge;
+Heartbeat quickens under pressure; adrenaline surges; focus narrows;
+Heartbeat echoes resolve; steps align; purpose solidifies;
+Heartbeat steadies with calm; clarity returns; actions streamline;
+Surrender releases tension; acceptance grows; new paths open;
+Surrender invites collaboration; trust builds; outcomes improve;
+Surrender acknowledges limits; learning accelerates; future strengthens.`,
+    answer: null,
+  },
+  {
     title: 'Steal Art Style Fingerprint',
     prompt: `Go to Gemini and paste this:
 
