@@ -62,7 +62,7 @@ Man: starving. Enters restaurant. Waiter: menu. Man: eyes menu, brain: “food?�
 
 # Ax Translator — DSPy-like Translation Pipeline
 
-Translate text into clean, understandable language using a DSPy-inspired pipeline powered by MiniMax M2.7 via OpenCode.
+Translate text into clean, understandable language using a DSPy-inspired pipeline powered by GLM 5.1 via OpenCode.
 
 ## Features
 
@@ -77,7 +77,7 @@ Translate text into clean, understandable language using a DSPy-inspired pipelin
 
 - **Frontend**: Next.js 16, React 19, shadcn/ui, Tailwind CSS
 - **Backend**: Next.js API Routes with embedded pipeline
-- **LLM**: MiniMax M2.7 via OpenCode (`opencode.ai`) — Anthropic Messages API compatible
+- **LLM**: GLM 5.1 via OpenCode (`opencode.ai`) — Anthropic Messages API compatible
 
 ## Getting Started
 
@@ -117,7 +117,7 @@ If no server-side key is set, the app runs in **fast mode** (translate only) and
 ## How the Pipeline Works
 
 ### Stage 1: Translate
-MiniMax M2.7 translates your text with a carefully compiled system prompt that preserves meaning and tone.
+GLM 5.1 translates your text with a carefully compiled system prompt that preserves meaning and tone.
 
 ### Stage 2: Validate
 A separate LLM call evaluates accuracy, fluency, completeness, and terminology. Returns a quality score (0-100) and list of issues.
@@ -143,7 +143,7 @@ src/
 │   └── api/translate/
 │       └── route.ts          # API route (calls pipeline)
 ├── lib/
-│   ├── minimax-client.ts     # MiniMax M2.7 API client (Anthropic Messages compatible)
+│   ├── llm-client.ts           # GLM 5.1 API client (Anthropic Messages compatible)
 │   └── translation-pipeline.ts  # DSPy-like pipeline
 └── components/ui/            # shadcn/ui components
 ```

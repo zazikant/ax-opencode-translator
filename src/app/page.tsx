@@ -516,7 +516,7 @@ export default function AxTranslatorPage() {
   const handleTranslate = useCallback(async () => {
     if (!inputText.trim()) return;
     if (!hasApiKey) {
-      setError('Please enter your MiniMax API key');
+      setError('Please enter your OpenCode API key');
       return;
     }
     if (!targetLanguage) {
@@ -592,7 +592,7 @@ export default function AxTranslatorPage() {
           qualityScore: Math.round(totalQuality / chunks.length),
           attempts: totalAttempts,
           refinements: totalRefinements,
-          model: 'minimax-m2.7',
+          model: 'glm-5.1',
           pipeline: [`chunked-${chunks.length}`],
         };
         setResult(combinedResult);
@@ -737,13 +737,13 @@ export default function AxTranslatorPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight">Ax Translator</h1>
-              <p className="text-xs text-muted-foreground">DSPy-like translation pipeline powered by MiniMax M2.7</p>
+              <p className="text-xs text-muted-foreground">DSPy-like translation pipeline powered by GLM 5.1</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="gap-1 text-xs">
               <Zap className="size-3" />
-              MiniMax M2.7
+              GLM 5.1
             </Badge>
           </div>
         </div>
@@ -770,7 +770,7 @@ export default function AxTranslatorPage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <Key className="size-4 text-muted-foreground" />
-                  <CardTitle className="text-base">MiniMax API Key</CardTitle>
+                  <CardTitle className="text-base">OpenCode API Key</CardTitle>
                   {hasServerKey && !apiKey.trim() && (
                     <Badge variant="default" className="gap-1 text-xs bg-emerald-600 hover:bg-emerald-700">
                       <CheckCircle className="size-3" />
@@ -983,7 +983,7 @@ export default function AxTranslatorPage() {
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {currentStage === 'chunking' && 'Splitting text into manageable chunks...'}
-                          {currentStage === 'translate' && 'Sending to MiniMax M2.7...'}
+                          {currentStage === 'translate' && 'Sending to GLM 5.1...'}
                           {currentStage === 'validate' && 'Checking translation quality...'}
                           {currentStage === 'refine' && 'Improving translation based on feedback...'}
                         </p>
@@ -1192,7 +1192,7 @@ export default function AxTranslatorPage() {
                       <p className="text-sm font-medium">Translate</p>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      MiniMax M2.7 translates your text with a carefully compiled prompt. Large texts are auto-chunked at ~6K token boundaries.
+                      GLM 5.1 translates your text with a carefully compiled prompt. Large texts are auto-chunked at ~6K token boundaries.
                     </p>
                   </div>
                   <div className="space-y-2 p-4 rounded-lg bg-muted/50">
@@ -1287,7 +1287,7 @@ export default function AxTranslatorPage() {
       <footer className="border-t mt-auto">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between text-xs text-muted-foreground">
           <span>Ax Translator — DSPy-like Translation Pipeline</span>
-          <span>Powered by MiniMax M2.7</span>
+          <span>Powered by GLM 5.1</span>
         </div>
       </footer>
     </div>

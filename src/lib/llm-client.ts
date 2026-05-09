@@ -1,32 +1,32 @@
 /**
- * MiniMax M2.7 API Client — Anthropic Messages-compatible interface
+ * GLM 5.1 API Client — Anthropic Messages-compatible interface
  *
- * Calls MiniMax's M2.7 model via the Anthropic-compatible messages endpoint.
+ * Calls the GLM 5.1 model via the Anthropic-compatible messages endpoint.
  * Uses system + user message format (Anthropic Messages API).
  *
  * Base URL: https://opencode.ai/zen/go
- * Default model: minimax-m2.7
+ * Default model: glm-5.1
  * Endpoint: /v1/messages (Anthropic-compatible)
  * Auth: x-api-key header
  */
 
-const MINIMAX_BASE_URL = 'https://opencode.ai/zen/go';
-const DEFAULT_MODEL = 'minimax-m2.7';
+const LLM_BASE_URL = 'https://opencode.ai/zen/go';
+const DEFAULT_MODEL = 'glm-5.1';
 
-export interface MinimaxChatMessage {
+export interface LLMChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
 }
 
-export interface MinimaxChatOptions {
+export interface LLMChatOptions {
   model?: string;
-  messages: MinimaxChatMessage[];
+  messages: LLMChatMessage[];
   temperature?: number;
   maxTokens?: number;
   apiKey: string; // Required — always pass explicitly
 }
 
-export interface MinimaxChatResponse {
+export interface LLMChatResponse {
   content: string;
   model: string;
   usage?: {
@@ -46,10 +46,10 @@ function extractTextFromContent(content: Array<{ type: string; text?: string }>)
 }
 
 /**
- * Call MiniMax's Anthropic-compatible messages API.
+ * Call GLM 5.1's Anthropic-compatible messages API.
  * API key is always passed via options.apiKey.
  */
-export async function minimaxChatCompletion(options: MinimaxChatOptions): Promise<MinimaxChatResponse> {
+export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMChatResponse> {
   const model = options.model || DEFAULT_MODEL;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 120_000); // 2 min timeout
@@ -69,7 +69,7 @@ export async function minimaxChatCompletion(options: MinimaxChatOptions): Promis
       body.system = systemMessage;
     }
 
-    const response = await fetch(`${MINIMAX_BASE_URL}/v1/messages`, {
+    const response = await fetch(`${LLM_BASE_URL}/v1/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,13 +84,13 @@ export async function minimaxChatCompletion(options: MinimaxChatOptions): Promis
 
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`MiniMax API error (${response.status}): ${errText}`);
+      throw new Error(`GLM API error (${response.status}): ${errText}`);
     }
 
     const data = await response.json();
     const content = extractTextFromContent(data.content || []);
     if (!content) {
-      throw new Error('MiniMax API returned empty response');
+      throw new Error('GLM API returned empty response');
     }
 
     return {
@@ -101,7 +101,7 @@ export async function minimaxChatCompletion(options: MinimaxChatOptions): Promis
   } catch (err: unknown) {
     clearTimeout(timeout);
     if (err instanceof Error && err.name === 'AbortError') {
-      throw new Error('MiniMax API request timed out after 120s');
+      throw new Error('GLM API request timed out after 120s');
     }
     throw err;
   }
@@ -111,7 +111,7 @@ export async function minimaxChatCompletion(options: MinimaxChatOptions): Promis
  * Convenience: Call with system prompt + user content + API key.
  * This is the primary way the pipeline calls the LLM.
  */
-export async function callMinimaxLLM(
+export async function callLLM(
   systemPrompt: string,
   userContent: string,
   apiKey: string,
@@ -124,7 +124,7 @@ export async function callMinimaxLLM(
   const timeout = setTimeout(() => controller.abort(), 120_000);
 
   try {
-    const response = await fetch(`${MINIMAX_BASE_URL}/v1/messages`, {
+    const response = await fetch(`${LLM_BASE_URL}/v1/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -147,24 +147,24 @@ export async function callMinimaxLLM(
 
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`MiniMax API error (${response.status}): ${errText}`);
+      throw new Error(`GLM API error (${response.status}): ${errText}`);
     }
 
     const data = await response.json();
     const content = extractTextFromContent(data.content || []);
     if (!content) {
-      console.error('[MiniMax] Empty response. Full data:', JSON.stringify(data).substring(0, 500));
-      throw new Error('MiniMax API returned empty response');
+      console.error('[GLM] Empty response. Full data:', JSON.stringify(data).substring(0, 500));
+      throw new Error('GLM API returned empty response');
     }
-    console.log(`[MiniMax] Response received. Content length: ${content.length}, preview: "${content.substring(0, 150)}"`);
+    console.log(`[GLM] Response received. Content length: ${content.length}, preview: "${content.substring(0, 150)}"`);
     return content;
   } catch (err: unknown) {
     clearTimeout(timeout);
     if (err instanceof Error && err.name === 'AbortError') {
-      throw new Error('MiniMax API request timed out after 120s');
+      throw new Error('GLM API request timed out after 120s');
     }
     throw err;
   }
 }
 
-export { DEFAULT_MODEL, MINIMAX_BASE_URL };
+export { DEFAULT_MODEL, LLM_BASE_URL };
