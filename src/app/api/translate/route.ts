@@ -6,15 +6,6 @@ export const maxDuration = 60;
 
 import { runTranslationPipeline, runFastTranslation } from '@/lib/translation-pipeline';
 
-// ─── Token Estimation (mirrors frontend) ──────────────────────────────────────
-// Rough: 1 token ≈ 4 chars for English, 2 chars for CJK
-
-function estimateTokens(text: string): number {
-  const cjkChars = (text.match(/[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g) || []).length;
-  const otherChars = text.length - cjkChars;
-  return Math.ceil(cjkChars / 2 + otherChars / 4);
-}
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -40,38 +31,25 @@ export async function POST(request: NextRequest) {
 
     // ─── Pipeline Mode Selection ───────────────────────────────────────────
     // GLM 5.1 is a thinking model — each LLM call takes 15-30s.
-    // Full pipeline (translate → validate → refine) = 2-5 sequential calls.
-    // Vercel Pro maxDuration = 60s, so we must be smart about which mode to use.
+    // Full pipeline (translate → validate → refine) = 2-5 sequential calls
+    // = 60-150s total, which exceeds Vercel's 60s maxDuration.
     //
     // Strategy:
-    // 1. fast=true (explicit) → always use fast mode
-    // 2. fast=false (explicit) → always use full pipeline
-    // 3. Default (fast undefined):
-    //    - Large input (>1500 tokens) → fast mode (single call fits in 60s)
-    //    - Small input → full pipeline (quality validation worth the time)
-    //    - No env key (likely Vercel Hobby) → fast mode
-
-    const inputTokens = estimateTokens(text);
-    const LARGE_INPUT_THRESHOLD = 1500; // tokens — above this, full pipeline will likely timeout
-
-    let useFastMode: boolean;
-    if (fast === true) {
-      useFastMode = true;
-    } else if (fast === false) {
-      useFastMode = false;
-    } else {
-      // Auto-decide: fast for large inputs, full pipeline for small
-      useFastMode = inputTokens > LARGE_INPUT_THRESHOLD || !process.env.OPENCODE_API_KEY;
-    }
+    // - fast=false (explicit) → full pipeline (for hosts with longer timeouts)
+    // - Default (fast undefined or fast=true) → fast mode (single translate call)
+    //
+    // Fast mode produces excellent quality because the same-language
+    // transformation prompts are rich and guide GLM 5.1 well.
+    const useFastMode = fast !== false;
 
     if (useFastMode) {
-      console.log(`[Translate API] FAST mode (input: ~${inputTokens} tokens, threshold: ${LARGE_INPUT_THRESHOLD})`);
+      console.log('[Translate API] FAST mode (translate only, optimized for Vercel)');
       const result = await runFastTranslation(input);
       return NextResponse.json(result);
     }
 
     // Full pipeline: translate → validate → refine
-    console.log(`[Translate API] FULL pipeline (input: ~${inputTokens} tokens)`);
+    console.log('[Translate API] FULL pipeline (translate → validate → refine)');
     const result = await runTranslationPipeline(input);
     return NextResponse.json(result);
   } catch (error: unknown) {
