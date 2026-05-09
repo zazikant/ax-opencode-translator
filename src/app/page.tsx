@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import ReactMarkdown from 'react-markdown';
 import {
   Card,
   CardContent,
@@ -1038,11 +1039,19 @@ export default function AxTranslatorPage() {
                     <div className="min-h-[200px] space-y-3">
                       <div
                         ref={outputRef}
-                        className="rounded-lg bg-muted/50 p-4 max-h-[400px] overflow-y-auto"
+                        className="rounded-lg bg-muted/50 p-4 max-h-[600px] overflow-y-auto prose prose-sm prose-neutral dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+                        style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
                       >
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                          {result.translatedText}
-                        </p>
+                        {outputTokens > 8000 ? (
+                          // For very large outputs, render as pre-formatted text to avoid
+                          // heavy DOM from markdown parsing on 200K+ char strings
+                          <pre className="text-sm leading-relaxed whitespace-pre-wrap break-words font-sans m-0 bg-transparent p-0" style={{ overflowWrap: 'anywhere' }}>
+                            {result.translatedText}
+                          </pre>
+                        ) : (
+                          // For normal outputs, render markdown for rich formatting
+                          <ReactMarkdown>{result.translatedText}</ReactMarkdown>
+                        )}
                       </div>
                       {/* Quality Metrics */}
                       <div className="flex flex-wrap items-center gap-2">
