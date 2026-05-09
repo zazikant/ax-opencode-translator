@@ -12,11 +12,11 @@ export async function POST(request: NextRequest) {
     const { text, sourceLanguage, targetLanguage, apiKey, model, fast } = body;
 
     // API key: use the one from frontend, or fall back to env variable
-    const resolvedApiKey = apiKey || process.env.NVIDIA_API_KEY;
+    const resolvedApiKey = apiKey || process.env.OPENCODE_API_KEY;
 
     if (!text || !targetLanguage || !resolvedApiKey) {
       return NextResponse.json(
-        { error: 'Missing required fields: text, targetLanguage, apiKey (or set NVIDIA_API_KEY env var)' },
+        { error: 'Missing required fields: text, targetLanguage, apiKey (or set OPENCODE_API_KEY env var)' },
         { status: 400 }
       );
     }
@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
     // Choose pipeline mode:
     // - fast=true → skip validate/refine (for Vercel Hobby / speed)
     // - fast=false → full translate→validate→refine pipeline
-    // - Default: fast mode on Vercel (no env key = likely Hobby), full pipeline if NVIDIA_API_KEY is set
-    const useFastMode = fast === true || (fast === undefined && !process.env.NVIDIA_API_KEY);
+    // - Default: fast mode on Vercel (no env key = likely Hobby), full pipeline if OPENCODE_API_KEY is set
+    const useFastMode = fast === true || (fast === undefined && !process.env.OPENCODE_API_KEY);
 
     if (useFastMode) {
       console.log('[Translate API] Using FAST mode (translate only)');
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     // If timeout error, suggest fast mode
     if (message.includes('timeout') || message.includes('timed out')) {
       return NextResponse.json(
-        { error: 'Translation timed out. Try using fast mode (add "fast": true to request) or set NVIDIA_API_KEY env var on Vercel Pro.' },
+        { error: 'Translation timed out. Try using fast mode (add "fast": true to request) or set OPENCODE_API_KEY env var on Vercel Pro.' },
         { status: 504 }
       );
     }

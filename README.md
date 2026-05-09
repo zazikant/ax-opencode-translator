@@ -62,7 +62,7 @@ Man: starving. Enters restaurant. Waiter: menu. Man: eyes menu, brain: “food?�
 
 # Ax Translator — DSPy-like Translation Pipeline
 
-Translate text into clean, understandable language using a DSPy-inspired pipeline powered by NVIDIA GPT-OSS 120B.
+Translate text into clean, understandable language using a DSPy-inspired pipeline powered by MiniMax M2.7 via OpenCode.
 
 ## Features
 
@@ -71,13 +71,13 @@ Translate text into clean, understandable language using a DSPy-inspired pipelin
 - **Surgical Refinement**: If quality is low, targeted fixes are applied
 - **26 Languages**: Including Hindi, Spanish, French, Japanese, Chinese, Arabic, and more
 - **Auto-Detect**: Automatic source language detection
-- **Session-Only API Key**: Your NVIDIA API key is never stored on the server
+- **Session-Only API Key**: Your OpenCode API key is never stored on the server
 
 ## Tech Stack
 
 - **Frontend**: Next.js 16, React 19, shadcn/ui, Tailwind CSS
 - **Backend**: Next.js API Routes with embedded pipeline
-- **LLM**: NVIDIA GPT-OSS 120B via `integrate.api.nvidia.com`
+- **LLM**: MiniMax M2.7 via OpenCode (`opencode.ai`) — Anthropic Messages API compatible
 
 ## Getting Started
 
@@ -85,7 +85,7 @@ Translate text into clean, understandable language using a DSPy-inspired pipelin
 
 - Node.js 18+
 - npm or bun
-- NVIDIA API key from [build.nvidia.com](https://build.nvidia.com/)
+- OpenCode API key from [opencode.ai](https://opencode.ai/)
 
 ### Installation
 
@@ -98,26 +98,26 @@ npm run dev
 
 ### Environment Variables
 
-No server-side environment variables required. The NVIDIA API key is provided by the user in the browser UI and passed directly to the API — it's never stored.
-
-If you want to set a default API key (optional):
+Set `OPENCODE_API_KEY` on the server to enable the full pipeline (Translate → Validate → Refine) without requiring users to enter a key in the UI.
 
 ```bash
-# Optional — users can also enter their key in the UI
-NVIDIA_API_KEY=nvapi-xxxxx
+# Required for server-side full pipeline mode
+OPENCODE_API_KEY=sk-xxxxx
 ```
+
+If no server-side key is set, the app runs in **fast mode** (translate only) and the user must provide their own API key in the browser UI.
 
 ### Deploy to Vercel
 
 1. Push to GitHub
 2. Import repo in [vercel.com](https://vercel.com)
-3. No environment variables required (API key is user-provided)
+3. Set the `OPENCODE_API_KEY` environment variable in Vercel project settings
 4. Deploy!
 
 ## How the Pipeline Works
 
 ### Stage 1: Translate
-NVIDIA GPT-OSS 120B translates your text with a carefully compiled system prompt that preserves meaning and tone.
+MiniMax M2.7 translates your text with a carefully compiled system prompt that preserves meaning and tone.
 
 ### Stage 2: Validate
 A separate LLM call evaluates accuracy, fluency, completeness, and terminology. Returns a quality score (0-100) and list of issues.
@@ -143,7 +143,7 @@ src/
 │   └── api/translate/
 │       └── route.ts          # API route (calls pipeline)
 ├── lib/
-│   ├── nvidia-client.ts      # NVIDIA API client
+│   ├── minimax-client.ts     # MiniMax M2.7 API client (Anthropic Messages compatible)
 │   └── translation-pipeline.ts  # DSPy-like pipeline
 └── components/ui/            # shadcn/ui components
 ```

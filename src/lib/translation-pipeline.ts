@@ -20,7 +20,7 @@
  * - Single translate call only, no validate/refine
  */
 
-import { callNvidiaLLM, DEFAULT_MODEL } from './nvidia-client';
+import { callMinimaxLLM, DEFAULT_MODEL } from './minimax-client';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -60,7 +60,7 @@ function estimateTokens(text: string): number {
 
 /**
  * Calculate max_tokens for the output based on input length.
- * GPT-OSS-120B supports large context; we give generous output budget.
+ * MiniMax M2.7 supports large context; we give generous output budget.
  * Translation length ≈ input length × 1.5 (safety margin for longer target languages).
  * Minimum 2048, maximum 16384.
  */
@@ -152,7 +152,7 @@ Rules:
   const maxTokens = calculateMaxTokens(input.text);
   console.log(`[Pipeline] Dynamic max_tokens: ${maxTokens} (input est. ${estimateTokens(input.text)} tokens)`);
 
-  const result = await callNvidiaLLM(systemPrompt, userContent, input.apiKey, input.model, maxTokens, 0.3);
+  const result = await callMinimaxLLM(systemPrompt, userContent, input.apiKey, input.model, maxTokens, 0.3);
 
   // Strip any markdown code blocks or quotes the LLM might add
   const cleaned = result
@@ -204,7 +204,7 @@ Translation (${input.targetLanguage}):
 ${translatedText}
 """`;
 
-  const result = await callNvidiaLLM(systemPrompt, userContent, input.apiKey, input.model, 1024, 0.1);
+  const result = await callMinimaxLLM(systemPrompt, userContent, input.apiKey, input.model, 1024, 0.1);
 
   try {
     const jsonMatch = result.match(/\{[\s\S]*\}/);
@@ -250,7 +250,7 @@ ${translatedText}
 Issues found with the current translation:
 ${issuesList}`;
 
-  const result = await callNvidiaLLM(systemPrompt, userContent, input.apiKey, input.model, calculateMaxTokens(translatedText), 0.2);
+  const result = await callMinimaxLLM(systemPrompt, userContent, input.apiKey, input.model, calculateMaxTokens(translatedText), 0.2);
 
   return result
     .replace(/^```[\w]*\n?/m, '')

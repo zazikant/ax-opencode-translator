@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Ax Translator — DSPy-like Translation Pipeline",
-  description: "Translate text to clean, understandable language using a DSPy-inspired pipeline powered by NVIDIA GPT-OSS 120B with Temporal orchestration.",
-  keywords: ["Ax Translator", "DSPy", "translation", "NVIDIA", "LLM", "Temporal", "TypeScript"],
+  description: "Translate text to clean, understandable language using a DSPy-inspired pipeline powered by MiniMax M2.7 with Temporal orchestration.",
+  keywords: ["Ax Translator", "DSPy", "translation", "MiniMax", "LLM", "Temporal", "TypeScript"],
   authors: [{ name: "Ax Translator" }],
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",

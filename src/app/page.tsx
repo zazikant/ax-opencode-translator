@@ -452,7 +452,7 @@ export default function AxTranslatorPage() {
   // API Key state — persist in sessionStorage so it survives page refreshes
   const [apiKey, setApiKey] = useState(() => {
     if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('nvidia_api_key') || '';
+      return sessionStorage.getItem('opencode_api_key') || '';
     }
     return '';
   });
@@ -476,9 +476,9 @@ export default function AxTranslatorPage() {
     setApiKey(value);
     if (typeof window !== 'undefined') {
       if (value) {
-        sessionStorage.setItem('nvidia_api_key', value);
+        sessionStorage.setItem('opencode_api_key', value);
       } else {
-        sessionStorage.removeItem('nvidia_api_key');
+        sessionStorage.removeItem('opencode_api_key');
       }
     }
   };
@@ -516,7 +516,7 @@ export default function AxTranslatorPage() {
   const handleTranslate = useCallback(async () => {
     if (!inputText.trim()) return;
     if (!hasApiKey) {
-      setError('Please enter your NVIDIA API key');
+      setError('Please enter your MiniMax API key');
       return;
     }
     if (!targetLanguage) {
@@ -592,7 +592,7 @@ export default function AxTranslatorPage() {
           qualityScore: Math.round(totalQuality / chunks.length),
           attempts: totalAttempts,
           refinements: totalRefinements,
-          model: 'openai/gpt-oss-120b',
+          model: 'minimax-m2.7',
           pipeline: [`chunked-${chunks.length}`],
         };
         setResult(combinedResult);
@@ -625,7 +625,7 @@ export default function AxTranslatorPage() {
         if (!response.ok) {
           // Check for Vercel timeout specifically
           if (response.status === 504 || (data.error && data.error.includes('timeout'))) {
-            setError('Translation timed out on server. This usually happens on Vercel Hobby plan. Set NVIDIA_API_KEY env var on Vercel for the full pipeline, or try shorter text.');
+            setError('Translation timed out on server. This usually happens on Vercel Hobby plan. Set OPENCODE_API_KEY env var on Vercel for the full pipeline, or try shorter text.');
           } else {
             setError(data.error || 'Translation failed');
           }
@@ -737,13 +737,13 @@ export default function AxTranslatorPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight">Ax Translator</h1>
-              <p className="text-xs text-muted-foreground">DSPy-like translation pipeline powered by NVIDIA LLM</p>
+              <p className="text-xs text-muted-foreground">DSPy-like translation pipeline powered by MiniMax M2.7</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="gap-1 text-xs">
               <Zap className="size-3" />
-              GPT-OSS 120B
+              MiniMax M2.7
             </Badge>
           </div>
         </div>
@@ -770,7 +770,7 @@ export default function AxTranslatorPage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <Key className="size-4 text-muted-foreground" />
-                  <CardTitle className="text-base">NVIDIA API Key</CardTitle>
+                  <CardTitle className="text-base">MiniMax API Key</CardTitle>
                   {hasServerKey && !apiKey.trim() && (
                     <Badge variant="default" className="gap-1 text-xs bg-emerald-600 hover:bg-emerald-700">
                       <CheckCircle className="size-3" />
@@ -783,12 +783,12 @@ export default function AxTranslatorPage() {
                     ? 'A server-side API key is available and will be used by default. Enter your own key below to override it.'
                     : <>No server API key configured. Enter your key below — it is saved in your browser session (survives refresh, cleared on tab close). Get one from{' '}
                     <a
-                      href="https://build.nvidia.com/"
+                      href="https://opencode.ai/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary underline underline-offset-4 hover:text-primary/80"
                     >
-                      build.nvidia.com
+                      opencode.ai
                     </a></>
                   }
                 </CardDescription>
@@ -797,7 +797,7 @@ export default function AxTranslatorPage() {
                 <div className="relative">
                   <Input
                     type={showApiKey ? 'text' : 'password'}
-                    placeholder={hasServerKey ? 'Override server key (optional)' : 'nvapi-...'}
+                    placeholder={hasServerKey ? 'Override server key (optional)' : 'sk-...'}
                     value={apiKey}
                     onChange={(e) => handleApiKeyChange(e.target.value)}
                     className="pr-10 font-mono"
@@ -983,7 +983,7 @@ export default function AxTranslatorPage() {
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {currentStage === 'chunking' && 'Splitting text into manageable chunks...'}
-                          {currentStage === 'translate' && 'Sending to NVIDIA GPT-OSS 120B...'}
+                          {currentStage === 'translate' && 'Sending to MiniMax M2.7...'}
                           {currentStage === 'validate' && 'Checking translation quality...'}
                           {currentStage === 'refine' && 'Improving translation based on feedback...'}
                         </p>
@@ -1192,7 +1192,7 @@ export default function AxTranslatorPage() {
                       <p className="text-sm font-medium">Translate</p>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      NVIDIA GPT-OSS 120B translates your text with a carefully compiled prompt. Large texts are auto-chunked at ~6K token boundaries.
+                      MiniMax M2.7 translates your text with a carefully compiled prompt. Large texts are auto-chunked at ~6K token boundaries.
                     </p>
                   </div>
                   <div className="space-y-2 p-4 rounded-lg bg-muted/50">
@@ -1287,7 +1287,7 @@ export default function AxTranslatorPage() {
       <footer className="border-t mt-auto">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between text-xs text-muted-foreground">
           <span>Ax Translator — DSPy-like Translation Pipeline</span>
-          <span>Powered by NVIDIA GPT-OSS 120B</span>
+          <span>Powered by MiniMax M2.7</span>
         </div>
       </footer>
     </div>
