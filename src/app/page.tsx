@@ -584,7 +584,12 @@ export default function AxTranslatorPage() {
           const data = await response.json();
 
           if (!response.ok) {
-            setError(data.error || `Translation failed on chunk ${i + 1}/${chunks.length}`);
+            const errMsg = data.error || `Translation failed on chunk ${i + 1}/${chunks.length}`;
+            if (errMsg.includes('timeout')) {
+              setError(`Chunk ${i + 1} timed out. GLM 5.1 is a thinking model — try shorter input or fewer terms per chunk.`);
+            } else {
+              setError(errMsg);
+            }
             setIsTranslating(false);
             setCurrentStage('');
             setChunkProgress(null);
@@ -649,7 +654,7 @@ export default function AxTranslatorPage() {
         if (!response.ok) {
           // Check for Vercel timeout specifically
           if (response.status === 504 || (data.error && data.error.includes('timeout'))) {
-            setError('Translation timed out on server. This usually happens on Vercel Hobby plan. Set OPENCODE_API_KEY env var on Vercel for the full pipeline, or try shorter text.');
+            setError('Translation timed out. GLM 5.1 is a thinking model that takes time for complex transformations. Try using fewer terms or shorter input text.');
           } else {
             setError(data.error || 'Translation failed');
           }

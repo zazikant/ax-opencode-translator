@@ -43,7 +43,7 @@ export interface LLMChatResponse {
 export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMChatResponse> {
   const model = options.model || DEFAULT_MODEL;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 120_000); // 2 min timeout
+  const timeout = setTimeout(() => controller.abort(), 50_000); // 50s — leaves 10s buffer for Vercel's 60s maxDuration
 
   try {
     const response = await fetch(`${LLM_BASE_URL}/v1/chat/completions`, {
@@ -84,7 +84,7 @@ export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMCha
   } catch (err: unknown) {
     clearTimeout(timeout);
     if (err instanceof Error && err.name === 'AbortError') {
-      throw new Error('GLM API request timed out after 120s');
+      throw new Error('GLM API request timed out after 50s. The input may be too long for a single request — try shorter text or fewer terms.');
     }
     throw err;
   }
@@ -104,7 +104,7 @@ export async function callLLM(
 ): Promise<string> {
   const modelName = model || DEFAULT_MODEL;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 120_000);
+  const timeout = setTimeout(() => controller.abort(), 50_000); // 50s — leaves 10s buffer for Vercel's 60s maxDuration
 
   try {
     const response = await fetch(`${LLM_BASE_URL}/v1/chat/completions`, {
@@ -145,7 +145,7 @@ export async function callLLM(
   } catch (err: unknown) {
     clearTimeout(timeout);
     if (err instanceof Error && err.name === 'AbortError') {
-      throw new Error('GLM API request timed out after 120s');
+      throw new Error('GLM API request timed out after 50s. The input may be too long for a single request — try shorter text or fewer terms.');
     }
     throw err;
   }
