@@ -60,14 +60,21 @@ function estimateTokens(text: string): number {
 
 /**
  * Calculate max_tokens for the output based on input length.
- * GLM 5.1 supports large context; we give generous output budget.
- * Translation length ≈ input length × 1.5 (safety margin for longer target languages).
- * Minimum 2048, maximum 16384.
+ * GLM 5.1 is a thinking model — it uses tokens for internal reasoning before
+ * producing output. We must allocate enough tokens for BOTH reasoning + output.
+ *
+ * For same-language transformation (en→en), output can be 3-5× the input
+ * (telegraphic notes → structured essay with explanations).
+ * For cross-language translation, output ≈ input × 1.5.
+ *
+ * Minimum 4096 (thinking models need at least this much), maximum 16384.
  */
-function calculateMaxTokens(inputText: string): number {
+function calculateMaxTokens(inputText: string, isSameLanguage: boolean = false): number {
   const inputTokens = estimateTokens(inputText);
-  const outputTokens = Math.ceil(inputTokens * 1.5);
-  return Math.max(2048, Math.min(16384, outputTokens));
+  // Same-language transformation produces much longer output (3-5× expansion)
+  const multiplier = isSameLanguage ? 4 : 1.5;
+  const outputTokens = Math.ceil(inputTokens * multiplier);
+  return Math.max(4096, Math.min(16384, outputTokens));
 }
 
 // ─── Echo Detection ─────────────────────────────────────────────────────────
@@ -188,7 +195,7 @@ Rules:
 
   console.log(`[Pipeline] translateText (retry=${isRetry}): src=${srcLabel}, target=${targetLabel}, input length=${input.text.length}`);
 
-  const maxTokens = calculateMaxTokens(input.text);
+  const maxTokens = calculateMaxTokens(input.text, isSameLanguage);
   console.log(`[Pipeline] Dynamic max_tokens: ${maxTokens} (input est. ${estimateTokens(input.text)} tokens)`);
 
   // Use higher temperature for same-language transformation (more creative/structured output)
@@ -324,7 +331,7 @@ ${translatedText}
 Issues found with the current translation:
 ${issuesList}`;
 
-  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, calculateMaxTokens(translatedText), 0.2);
+  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, calculateMaxTokens(translatedText, isSameLanguage), 0.2);
 
   return result
     .replace(/^```[\w]*\n?/m, '')

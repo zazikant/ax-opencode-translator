@@ -555,7 +555,7 @@ export default function AxTranslatorPage() {
     setChunkProgress(null);
 
     try {
-      // For large text (>8K tokens), chunk and translate in parts
+      // For large text (>4K tokens), chunk and translate in parts
       if (isLargeInput) {
         setCurrentStage('chunking');
         const chunks = splitIntoChunks(inputText, 3000); // ~3K tokens per chunk for better quality
