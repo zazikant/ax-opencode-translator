@@ -99,9 +99,13 @@ export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMCha
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || '';
+    const message = data.choices?.[0]?.message || {};
+    // Primary content, fallback to reasoning_content if content is empty
+    // (happens when thinking mode is partially active)
+    const content = message.content || message.reasoning_content || '';
 
     if (!content) {
+      console.error('[GLM] Empty response. Full data:', JSON.stringify(data).substring(0, 500));
       throw new Error('GLM API returned empty response');
     }
 
@@ -163,7 +167,10 @@ export async function callLLM(
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || '';
+    const message = data.choices?.[0]?.message || {};
+    // Primary content, fallback to reasoning_content if content is empty
+    // (happens when thinking mode is partially active)
+    const content = message.content || message.reasoning_content || '';
 
     if (!content) {
       console.error('[GLM] Empty response. Full data:', JSON.stringify(data).substring(0, 500));

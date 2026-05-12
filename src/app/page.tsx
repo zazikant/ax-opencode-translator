@@ -109,6 +109,19 @@ interface HistoryEntry {
 
 const EXAMPLES = [
   {
+    title: 'Professional Translator',
+    prompt: `You are a professional translator. Translate the provided text from {English} into {English}.
+Critical Rules:: Produce a clean, natural, and understandable translation. Preserve the original meaning exactly — do not add, remove, or change information. Use natural phrasing that a native speaker would use. Maintain the same tone and register (formal, informal, technical, etc.). If the text contains idioms, translate them to equivalent expressions in the target language. If the text contains technical terms, use the standard terminology in the target language. Output ONLY the translated text in {targetLanguage}. nothing else. Do NOT output the original text — you must output the translation
+
+
+Input::
+
+" Hello my name is shahikant and I love good "
+
+Answer::`,
+    answer: `Hello, my name is Shahikant, and I love good.`,
+  },
+  {
     title: 'Telegraphic Speech (Basic): Narrative',
     prompt: `Write a telegraphic speech based on the idea::
 scientist lab late night experiment fail again coffee cold notes scattered breakthrough near feel it data wrong somewhere mystery deep focus sharp deadline tomorrow funding cut fear ignore push forward`,
@@ -412,6 +425,28 @@ Artist/Movement Reference: Tom Whalen, Malika Favre, Bauhaus poster art, Constru
 Platform Benchmark: Behance, editorial illustration, cinematic concept art style tokens
 
 ==============================`,
+    answer: null,
+  },
+  {
+    title: 'Character Pose Stealing',
+    prompt: `Structured Meta-Prompting involves the structured interrogation of the visual mechanics that govern a character's poses. Isolate the anatomical mechanics of the character's posing. Determine the kinetic energy and line of action within the poses. Catalog the spatial relationships and framing inherent to the character's presentation. Synthesize the isolated elements into a definitive, reusable prompt structure.
+
+"Generate an image of [Subject] in the distinct posing style of [Target Character]. Apply the following extracted parameters: anatomical mechanics featuring [Proportions/Joints], pose dynamics characterized by [Line of Action/Energy], and spatial composition utilizing [Camera Angle/Negative Space]. Emphasize the exact visual language of the reference style.
+
+
+Answer::
+
+============== simplified prompt pose-1 after giving image and above prompt to gemini ==========
+
+Generate an image of [Subject] in the distinct posing style of Alice Lee's flat illustrations. Apply the following extracted parameters:
+
+Anatomical Mechanics: Featuring soft, rounded proportions with sloping shoulders, tapered limbs, and simplified, expressive hand gestures.
+
+Pose Dynamics: Characterized by a gentle, rhythmic line of action and "paused" domestic energy, utilizing relaxed contrapposto and slightly flexed joints to convey warmth.
+
+Spatial Composition: Utilizing a high three-quarter angle with a "flat-layered" depth. Surround the subject with overlapping organic elements to create a cozy, dense framing with minimal negative space.
+
+Emphasize: The clean, silhouette-driven posing and the whimsical, hospitable visual language of the reference style.`,
     answer: null,
   },
 ];

@@ -42,15 +42,20 @@ export async function POST(request: NextRequest) {
     // transformation prompts are rich and guide GLM 5.1 well.
     const useFastMode = fast !== false;
 
-    if (useFastMode) {
-      console.log('[Translate API] FAST mode (translate only, optimized for Vercel)');
-      const result = await runFastTranslation(input);
-      return NextResponse.json(result);
+    const result = useFastMode
+      ? await runFastTranslation(input)
+      : await runTranslationPipeline(input);
+
+    // If pipeline returned empty text, return error status instead of 200
+    if (!result.translatedText || result.translatedText.trim() === '') {
+      const errorMsg = result.issues?.[0] || 'Translation returned empty result';
+      console.error('[Translate API] Empty result:', errorMsg);
+      return NextResponse.json(
+        { error: errorMsg },
+        { status: 500 }
+      );
     }
 
-    // Full pipeline: translate → validate → refine
-    console.log('[Translate API] FULL pipeline (translate → validate → refine)');
-    const result = await runTranslationPipeline(input);
     return NextResponse.json(result);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';
