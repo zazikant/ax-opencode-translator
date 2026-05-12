@@ -9,12 +9,11 @@
  * Endpoint: /v1/chat/completions (OpenAI-compatible)
  * Auth: Authorization: Bearer header
  *
- * GLM 5.1 is a thinking/reasoning model. We minimize thinking via
- * reasoning_effort: "low" — this keeps reasoning minimal while allowing
- * the model to correctly interpret inputs. "none" disables thinking
- * entirely but causes quality issues (hallucination, misinterpreting
- * terms like confusing GTM with other meanings). "low" is the sweet
- * spot: minimal thinking tokens, high output quality, larger outputs.
+ * GLM 5.1 is a thinking/reasoning model. We disable thinking via
+ * reasoning_effort: "none" — this turns off internal reasoning so ALL
+ * max_tokens go to content output. This prevents the "empty content" bug
+ * where reasoning consumes all tokens. Quality is maintained through the
+ * detailed system prompt in translation-pipeline.ts.
  */
 
 const LLM_BASE_URL = 'https://opencode.ai/zen/go';
@@ -45,10 +44,9 @@ export interface LLMChatResponse {
 
 /**
  * Build the request body for GLM 5.1.
- * reasoning_effort: "low" keeps thinking minimal but allows the model to
- * correctly reason about the input before responding. "none" disables thinking
- * entirely but causes quality issues (hallucination, misinterpreting terms).
- * "low" is the sweet spot: minimal thinking tokens, high output quality.
+ * reasoning_effort: "none" disables internal reasoning so all tokens go to content.
+ * This prevents the "empty content" bug where reasoning consumes all max_tokens.
+ * Quality is maintained through the detailed system prompt which guides the model.
  * This is a string parameter — integer values are rejected by the gateway.
  */
 function buildRequestBody(
@@ -62,7 +60,7 @@ function buildRequestBody(
     messages,
     max_tokens: maxTokens,
     temperature,
-    reasoning_effort: 'low',
+    reasoning_effort: 'none',
     stream: false,
   };
 }
@@ -122,7 +120,7 @@ export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMCha
 /**
  * Convenience: Call with system prompt + user content + API key.
  * This is the primary way the pipeline calls the LLM.
- * Thinking is disabled for fast response times on Vercel.
+ * Thinking is disabled (reasoning_effort: "none") so all tokens go to output.
  */
 export async function callLLM(
   systemPrompt: string,

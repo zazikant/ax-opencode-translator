@@ -61,29 +61,22 @@ function estimateTokens(text: string): number {
 /**
  * Calculate max_tokens for the output based on input length.
  * With reasoning_effort: "none", thinking is OFF — all tokens go to content.
- * This means we can use the full token budget for output, not splitting
- * with internal reasoning.
- *
- * IMPORTANT: On Vercel, each LLM call must complete within 50s (leaving buffer
- * for the 60s maxDuration). With thinking OFF, generation is faster.
- * We cap at 8192 — enough for substantial same-language transformations.
+ * No need to reserve tokens for reasoning, so minimum can be lower.
  *
  * For same-language transformation (en→en), output can be 3-5× the input
  * (telegraphic notes → structured essay with explanations).
  * For cross-language translation, output ≈ input × 1.5.
  *
- * Minimum 3072, maximum 8192.
+ * Minimum 2048, maximum 8192.
  */
 function calculateMaxTokens(inputText: string, isSameLanguage: boolean = false): number {
   const inputTokens = estimateTokens(inputText);
   // Same-language transformation produces much longer output (3-5× expansion)
   const multiplier = isSameLanguage ? 4 : 1.5;
   const outputTokens = Math.ceil(inputTokens * multiplier);
-  // Minimum 3072: with reasoning_effort "low", thinking uses ~300-700 tokens,
-  // so we need at least 3072 to guarantee 2048+ for actual content output.
-  // If we set minimum too low (e.g., 2048), reasoning can consume ALL tokens
-  // leaving content empty (finish_reason: "length").
-  return Math.max(3072, Math.min(8192, outputTokens));
+  // With reasoning_effort "none", no tokens are consumed by reasoning,
+  // so 2048 minimum is sufficient — all goes to content.
+  return Math.max(2048, Math.min(8192, outputTokens));
 }
 
 // ─── Echo Detection ─────────────────────────────────────────────────────────
@@ -287,8 +280,8 @@ Translation (${input.targetLanguage}):
 ${translatedText}
 """`;
 
-  // GLM 5.1 with reasoning_effort "low" — need 2048 minimum (reasoning ~300-700 + content)
-  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 2048, 0.1);
+  // With reasoning_effort "none", 1024 is enough for validation JSON response
+  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 1024, 0.1);
 
   try {
     const jsonMatch = result.match(/\{[\s\S]*\}/);
