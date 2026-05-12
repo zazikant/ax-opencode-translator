@@ -60,12 +60,13 @@ function estimateTokens(text: string): number {
 
 /**
  * Calculate max_tokens for the output based on input length.
- * GLM 5.1 is a thinking model — it uses tokens for internal reasoning before
- * producing output. We must allocate enough tokens for BOTH reasoning + output.
+ * With reasoning_effort: "none", thinking is OFF — all tokens go to content.
+ * This means we can use the full token budget for output, not splitting
+ * with internal reasoning.
  *
  * IMPORTANT: On Vercel, each LLM call must complete within 50s (leaving buffer
- * for the 60s maxDuration). Higher max_tokens = longer generation time.
- * We cap at 8192 to keep response times reasonable.
+ * for the 60s maxDuration). With thinking OFF, generation is faster.
+ * We cap at 8192 — enough for substantial same-language transformations.
  *
  * For same-language transformation (en→en), output can be 3-5× the input
  * (telegraphic notes → structured essay with explanations).
@@ -282,8 +283,8 @@ Translation (${input.targetLanguage}):
 ${translatedText}
 """`;
 
-  // GLM 5.1 is a thinking model — needs at least 2048 max_tokens for reasoning + output
-  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 2048, 0.1);
+  // GLM 5.1 thinking model — 1024 enough for validation JSON response
+  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 1024, 0.1);
 
   try {
     const jsonMatch = result.match(/\{[\s\S]*\}/);

@@ -9,11 +9,11 @@
  * Endpoint: /v1/chat/completions (OpenAI-compatible)
  * Auth: Authorization: Bearer header
  *
- * GLM 5.1 is a thinking/reasoning model. The opencode.ai gateway does not
- * support disabling thinking mode — enable_thinking, chat_template_kwargs,
- * and reasoning_effort (int) are all rejected as extra inputs. Thinking
- * is always on. We allocate enough max_tokens for reasoning + output
- * and fall back to reasoning_content when content is empty.
+ * GLM 5.1 is a thinking/reasoning model. We disable thinking via
+ * reasoning_effort: "none" — this turns off internal reasoning so ALL
+ * max_tokens go to the actual output content. This gives larger outputs
+ * and faster responses. If reasoning_effort is not accepted by the gateway
+ * in future, we fall back to reasoning_content when content is empty.
  */
 
 const LLM_BASE_URL = 'https://opencode.ai/zen/go';
@@ -44,8 +44,8 @@ export interface LLMChatResponse {
 
 /**
  * Build the request body for GLM 5.1.
- * No thinking-disabling params — the opencode.ai gateway rejects them all.
- * GLM 5.1 always thinks; we allocate enough tokens for reasoning + output.
+ * reasoning_effort: "none" disables internal reasoning so all tokens go to output.
+ * This is a string parameter — integer values are rejected by the gateway.
  */
 function buildRequestBody(
   model: string,
@@ -58,6 +58,7 @@ function buildRequestBody(
     messages,
     max_tokens: maxTokens,
     temperature,
+    reasoning_effort: 'none',
     stream: false,
   };
 }
@@ -124,7 +125,7 @@ export async function callLLM(
   userContent: string,
   apiKey: string,
   model?: string,
-  maxTokens: number = 2048,
+  maxTokens: number = 4096,
   temperature: number = 0.3
 ): Promise<string> {
   const modelName = model || DEFAULT_MODEL;
@@ -159,8 +160,8 @@ export async function callLLM(
 
     const data = await response.json();
     const message = data.choices?.[0]?.message;
-    // GLM 5.1 returns reasoning in reasoning_content and the final answer in content.
-    // If content is empty (token limit hit during reasoning), fall back to reasoning_content.
+    // With reasoning_effort: "none", content should always be populated.
+    // Fallback to reasoning_content just in case the gateway ignores the param.
     const content = message?.content || message?.reasoning_content || '';
 
     if (!content) {
