@@ -9,9 +9,11 @@
  * Endpoint: /v1/chat/completions (OpenAI-compatible)
  * Auth: Authorization: Bearer header
  *
- * THINKING MODE DISABLED: We pass enable_thinking=false and reasoning_effort=0
- * to skip GLM 5.1's internal reasoning tokens. This makes responses 2-3×
- * faster (10-30s instead of 30-90s) which is critical for Vercel's 60s timeout.
+ * THINKING MODE DISABLED: We pass chat_template_kwargs: { enable_thinking: false }
+ * to skip GLM 5.1's internal reasoning tokens. The opencode.ai gateway rejects
+ * enable_thinking as a top-level param ("Extra inputs not permitted"), but accepts
+ * it wrapped in chat_template_kwargs. This makes responses ~15× faster
+ * (2s instead of 27s) which is critical for Vercel's 60s timeout.
  * Output quality remains excellent with well-crafted system prompts.
  */
 
@@ -43,8 +45,12 @@ export interface LLMChatResponse {
 
 /**
  * Build the request body with thinking disabled.
- * GLM 5.1 supports enable_thinking=false + reasoning_effort=0 to skip
- * internal reasoning tokens, making responses 2-3× faster.
+ * GLM 5.1 supports enable_thinking=false via chat_template_kwargs to skip
+ * internal reasoning tokens, making responses ~15× faster.
+ *
+ * IMPORTANT: enable_thinking MUST be wrapped in chat_template_kwargs — the
+ * opencode.ai gateway rejects it as a top-level param with 400
+ * "Extra inputs not permitted".
  */
 function buildRequestBody(
   model: string,
@@ -58,9 +64,9 @@ function buildRequestBody(
     max_tokens: maxTokens,
     temperature,
     stream: false,
-    // Disable thinking mode — saves 50-70% of token budget and response time
-    enable_thinking: false,
-    reasoning_effort: 0,
+    // Disable thinking mode via chat_template_kwargs wrapper
+    // Top-level enable_thinking is rejected by opencode.ai gateway with 400
+    chat_template_kwargs: { enable_thinking: false },
   };
 }
 
