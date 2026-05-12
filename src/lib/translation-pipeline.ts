@@ -60,22 +60,25 @@ function estimateTokens(text: string): number {
 
 /**
  * Calculate max_tokens for the output based on input length.
+ * GLM 5.1 is a thinking model — it uses tokens for internal reasoning before
+ * producing output. We must allocate enough tokens for BOTH reasoning + output.
  *
- * Thinking mode is now DISABLED via chat_template_kwargs: {enable_thinking: false}.
- * This means GLM 5.1 outputs only the final answer — no reasoning tokens.
- * Response times are 2-5s instead of 25-40s, and token usage is 10× lower.
+ * IMPORTANT: On Vercel, each LLM call must complete within 50s (leaving buffer
+ * for the 60s maxDuration). Higher max_tokens = longer generation time.
+ * We cap at 8192 to keep response times reasonable.
  *
- * Since no thinking overhead, we can use straightforward token budgets:
- * - Cross-language translation: output ≈ input × 1.5
- * - Same-language transformation: output ≈ input × 4 (3-5× expansion)
+ * For same-language transformation (en→en), output can be 3-5× the input
+ * (telegraphic notes → structured essay with explanations).
+ * For cross-language translation, output ≈ input × 1.5.
  *
- * Minimum 256, maximum 8192.
+ * Minimum 2048, maximum 8192.
  */
 function calculateMaxTokens(inputText: string, isSameLanguage: boolean = false): number {
   const inputTokens = estimateTokens(inputText);
-  const outputMultiplier = isSameLanguage ? 4 : 1.5;
-  const outputTokens = Math.ceil(inputTokens * outputMultiplier);
-  return Math.max(256, Math.min(8192, outputTokens));
+  // Same-language transformation produces much longer output (3-5× expansion)
+  const multiplier = isSameLanguage ? 4 : 1.5;
+  const outputTokens = Math.ceil(inputTokens * multiplier);
+  return Math.max(2048, Math.min(8192, outputTokens));
 }
 
 // ─── Echo Detection ─────────────────────────────────────────────────────────
@@ -279,8 +282,8 @@ Translation (${input.targetLanguage}):
 ${translatedText}
 """`;
 
-  // No thinking overhead — 512 is enough for validation JSON response
-  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 512, 0.1);
+  // GLM 5.1 is a thinking model — needs at least 2048 max_tokens for reasoning + output
+  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 2048, 0.1);
 
   try {
     const jsonMatch = result.match(/\{[\s\S]*\}/);
