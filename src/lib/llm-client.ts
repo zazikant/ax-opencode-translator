@@ -82,7 +82,7 @@ export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMCha
       body: JSON.stringify(buildRequestBody(
         model,
         options.messages,
-        options.maxTokens ?? 2048,
+        options.maxTokens ?? 4096,
         options.temperature ?? 0.7,
       )),
       signal: controller.signal,

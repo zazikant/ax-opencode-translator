@@ -72,14 +72,18 @@ function estimateTokens(text: string): number {
  * (telegraphic notes → structured essay with explanations).
  * For cross-language translation, output ≈ input × 1.5.
  *
- * Minimum 2048, maximum 8192.
+ * Minimum 3072, maximum 8192.
  */
 function calculateMaxTokens(inputText: string, isSameLanguage: boolean = false): number {
   const inputTokens = estimateTokens(inputText);
   // Same-language transformation produces much longer output (3-5× expansion)
   const multiplier = isSameLanguage ? 4 : 1.5;
   const outputTokens = Math.ceil(inputTokens * multiplier);
-  return Math.max(2048, Math.min(8192, outputTokens));
+  // Minimum 3072: with reasoning_effort "low", thinking uses ~300-700 tokens,
+  // so we need at least 3072 to guarantee 2048+ for actual content output.
+  // If we set minimum too low (e.g., 2048), reasoning can consume ALL tokens
+  // leaving content empty (finish_reason: "length").
+  return Math.max(3072, Math.min(8192, outputTokens));
 }
 
 // ─── Echo Detection ─────────────────────────────────────────────────────────
@@ -283,8 +287,8 @@ Translation (${input.targetLanguage}):
 ${translatedText}
 """`;
 
-  // GLM 5.1 thinking model — 1024 enough for validation JSON response
-  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 1024, 0.1);
+  // GLM 5.1 with reasoning_effort "low" — need 2048 minimum (reasoning ~300-700 + content)
+  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 2048, 0.1);
 
   try {
     const jsonMatch = result.match(/\{[\s\S]*\}/);
