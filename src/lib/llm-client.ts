@@ -9,11 +9,12 @@
  * Endpoint: /v1/chat/completions (OpenAI-compatible)
  * Auth: Authorization: Bearer header
  *
- * GLM 5.1 is a thinking/reasoning model. We disable thinking via
- * reasoning_effort: "none" — this turns off internal reasoning so ALL
- * max_tokens go to the actual output content. This gives larger outputs
- * and faster responses. If reasoning_effort is not accepted by the gateway
- * in future, we fall back to reasoning_content when content is empty.
+ * GLM 5.1 is a thinking/reasoning model. We minimize thinking via
+ * reasoning_effort: "low" — this keeps reasoning minimal while allowing
+ * the model to correctly interpret inputs. "none" disables thinking
+ * entirely but causes quality issues (hallucination, misinterpreting
+ * terms like confusing GTM with other meanings). "low" is the sweet
+ * spot: minimal thinking tokens, high output quality, larger outputs.
  */
 
 const LLM_BASE_URL = 'https://opencode.ai/zen/go';
@@ -44,7 +45,10 @@ export interface LLMChatResponse {
 
 /**
  * Build the request body for GLM 5.1.
- * reasoning_effort: "none" disables internal reasoning so all tokens go to output.
+ * reasoning_effort: "low" keeps thinking minimal but allows the model to
+ * correctly reason about the input before responding. "none" disables thinking
+ * entirely but causes quality issues (hallucination, misinterpreting terms).
+ * "low" is the sweet spot: minimal thinking tokens, high output quality.
  * This is a string parameter — integer values are rejected by the gateway.
  */
 function buildRequestBody(
@@ -58,7 +62,7 @@ function buildRequestBody(
     messages,
     max_tokens: maxTokens,
     temperature,
-    reasoning_effort: 'none',
+    reasoning_effort: 'low',
     stream: false,
   };
 }
