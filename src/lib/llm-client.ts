@@ -9,12 +9,14 @@
  * Endpoint: /v1/chat/completions (OpenAI-compatible)
  * Auth: Authorization: Bearer header
  *
- * THINKING MODE DISABLED: We pass chat_template_kwargs: { enable_thinking: false }
- * to skip GLM 5.1's internal reasoning tokens. The opencode.ai gateway rejects
- * enable_thinking as a top-level param ("Extra inputs not permitted"), but accepts
- * it wrapped in chat_template_kwargs. This makes responses ~15× faster
- * (2s instead of 27s) which is critical for Vercel's 60s timeout.
- * Output quality remains excellent with well-crafted system prompts.
+ * THINKING MODE DISABLED: We pass chat_template_kwargs: {enable_thinking: false}
+ * to disable GLM 5.1's internal reasoning tokens. This makes responses
+ * 10-15× faster (2-5s instead of 25-40s) and uses 10× fewer tokens.
+ *
+ * IMPORTANT: enable_thinking=false as a TOP-LEVEL field is rejected by the
+ * opencode.ai gateway with "Extra inputs are not permitted". It MUST be
+ * wrapped inside chat_template_kwargs. This was discovered via research
+ * using the NVIDIA gpt-oss-120b agent.
  */
 
 const LLM_BASE_URL = 'https://opencode.ai/zen/go';
@@ -44,13 +46,11 @@ export interface LLMChatResponse {
 }
 
 /**
- * Build the request body with thinking disabled.
- * GLM 5.1 supports enable_thinking=false via chat_template_kwargs to skip
- * internal reasoning tokens, making responses ~15× faster.
+ * Build the request body for the GLM 5.1 API with thinking disabled.
  *
- * IMPORTANT: enable_thinking MUST be wrapped in chat_template_kwargs — the
- * opencode.ai gateway rejects it as a top-level param with 400
- * "Extra inputs not permitted".
+ * CRITICAL: enable_thinking=false must be inside chat_template_kwargs.
+ * A top-level enable_thinking field causes 400 errors on the opencode.ai gateway.
+ * The chat_template_kwargs wrapper is the correct way to pass this flag.
  */
 function buildRequestBody(
   model: string,
@@ -64,9 +64,10 @@ function buildRequestBody(
     max_tokens: maxTokens,
     temperature,
     stream: false,
-    // Disable thinking mode via chat_template_kwargs wrapper
-    // Top-level enable_thinking is rejected by opencode.ai gateway with 400
-    chat_template_kwargs: { enable_thinking: false },
+    // Top-level enable_thinking=false causes 400 error on opencode.ai gateway
+    chat_template_kwargs: {
+      enable_thinking: false,
+    },
   };
 }
 
@@ -99,10 +100,10 @@ export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMCha
     }
 
     const data = await response.json();
-    const message = data.choices?.[0]?.message || {};
-    // Primary content, fallback to reasoning_content if content is empty
-    // (happens when thinking mode is partially active)
-    const content = message.content || message.reasoning_content || '';
+    const message = data.choices?.[0]?.message;
+    // GLM 5.1 returns reasoning in reasoning_content and the final answer in content.
+    // If content is empty (e.g. token limit hit during reasoning), fall back to reasoning_content.
+    const content = message?.content || message?.reasoning_content || '';
 
     if (!content) {
       console.error('[GLM] Empty response. Full data:', JSON.stringify(data).substring(0, 500));
@@ -126,14 +127,14 @@ export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMCha
 /**
  * Convenience: Call with system prompt + user content + API key.
  * This is the primary way the pipeline calls the LLM.
- * Thinking is disabled for fast response times on Vercel.
+ * GLM 5.1 thinks in reasoning_content, answers in content.
  */
 export async function callLLM(
   systemPrompt: string,
   userContent: string,
   apiKey: string,
   model?: string,
-  maxTokens: number = 2048,
+  maxTokens: number = 512,
   temperature: number = 0.3
 ): Promise<string> {
   const modelName = model || DEFAULT_MODEL;
@@ -167,10 +168,10 @@ export async function callLLM(
     }
 
     const data = await response.json();
-    const message = data.choices?.[0]?.message || {};
-    // Primary content, fallback to reasoning_content if content is empty
-    // (happens when thinking mode is partially active)
-    const content = message.content || message.reasoning_content || '';
+    const message = data.choices?.[0]?.message;
+    // GLM 5.1 returns reasoning in reasoning_content and the final answer in content.
+    // If content is empty (e.g. token limit hit during reasoning), fall back to reasoning_content.
+    const content = message?.content || message?.reasoning_content || '';
 
     if (!content) {
       console.error('[GLM] Empty response. Full data:', JSON.stringify(data).substring(0, 500));
