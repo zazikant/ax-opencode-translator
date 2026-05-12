@@ -134,38 +134,31 @@ async function translateText(input: TranslationRequest, isRetry: boolean = false
   if (isSameLanguage && !isRetry) {
     // ─── Same-Language Text Transformation Mode ─────────────────────────────
     // When source and target are the same language, the user is not "translating"
-    // but rather transforming/enhancing text (e.g., converting telegraphic notes
-    // into a structured essay, compressing to keywords, extracting action items).
-    // The user's input text contains embedded instructions that MUST be followed.
-    systemPrompt = `You are an expert text transformation assistant. The user provides text that contains INSTRUCTIONS followed by content. Your job is to follow those instructions precisely and produce the requested output.
+    // but rather transforming/enhancing text. The user's input text contains
+    // embedded instructions that MUST be followed.
+    // Philosophy: keep the system prompt SHORT like ax-translator — let the
+    // user's input carry the instructions. A short prompt = more tokens for output.
+    systemPrompt = `You are an expert text transformation assistant. Follow the user's instructions precisely and produce the requested output.
 
-CRITICAL RULES:
-- Read the user's text carefully. It contains transformation instructions (e.g., "Convert telegraphic notes into a formal essay", "Compress to keywords", "Extract action items", etc.)
-- Follow ALL instructions in the user's text exactly — formatting, style, structure, headings, bullet points, connectives, etc.
-- When the user asks for headings, subheadings, bullet points, or structured output — YOU MUST produce them. Never output a single flat paragraph when structured output is requested.
-- When the user asks for argumentative connectives and logical flow — use them: furthermore, consequently, therefore, however, in contrast, moreover, nevertheless, accordingly.
-- When the user asks for explanations of technical terms — explain what each term means in depth. When a concept is mentioned (e.g., "Go to Market strategy"), you SHOULD expand it into its natural sub-components (target market, value proposition, channel strategy, pricing, etc.) — this is not fabrication, it is proper elaboration. However, do NOT invent specific named software products or tools (e.g., Salesforce, HubSpot, Ahrefs) unless they are explicitly in the input.
-- When the user asks for a polished or formal style — write with professional, academic-quality prose.
-- When the user asks for "telegraphic speech" — expand each keyword/phrase into a brief grammatical clause (with articles, verb conjugations) and join them with semicolons into a single flowing sentence. Do NOT use periods or line breaks between clauses. Format: "Subject verb object; verb adjective; verb adverb; action phrase."
-- When the user asks for "expanded" or "multi-line" telegraphic speech with "causal chains" — for EACH source keyword, generate 3-5 separate lines. Each line starts with that keyword (Title Case) and spawns a causal chain of 3 ultra-compressed clauses (2-4 words each), separated by semicolons, one chain per line. NO bold headings. NO headings at all. Each line is self-contained. Clauses must be telegraphic: no articles, no filler words, just noun+verb or verb+adjective. Format: "Keyword verb noun; verb adjective; verb noun;" — one line per chain, newline between lines. Example for "Rain": "Rain floods valleys; rivers swell; bridges collapse;" on one line, "Rain nourishes soil; roots deepen; harvests multiply;" on the next line.
-- When the user asks to "extract action items" — list each distinct action as a bullet point. If a trailing qualifier (deadline, date) appears at the end of a list of actions, attach it only to the last action it directly follows, not to every action. Do NOT fabricate or infer actions not stated in the input.
-- Preserve ALL facts and information from the input. Do not add fabricated information.
-- Output ONLY the transformed text. No preamble, no meta-commentary, no labels like "Here is the output:".`;
+Rules:
+- The user's text contains transformation instructions — follow them exactly
+- Produce structured output (headings, bullet points, etc.) when requested
+- Expand concepts into their natural sub-components when explaining technical terms
+- Do NOT invent specific named software products unless explicitly in the input
+- Output ONLY the transformed text, nothing else`;
 
     userContent = input.text;
   } else if (isSameLanguage && isRetry) {
     // ─── Same-Language Retry ────────────────────────────────────────────────
-    systemPrompt = `You are an expert text transformation assistant. The user provides text that contains INSTRUCTIONS followed by content. Your job is to follow those instructions precisely and produce the requested output.
+    systemPrompt = `You are an expert text transformation assistant. The previous attempt did not follow the user's instructions properly.
 
-CRITICAL: The previous attempt produced output that was too similar to the input or did not follow the user's transformation instructions. You MUST actually transform the text according to the instructions.
+CRITICAL: You MUST transform the text according to the user's instructions — do not echo the input.
 
-RULES:
-- Read the user's text carefully and follow ALL embedded instructions precisely.
-- When the user asks for structured output (headings, bullet points, sections), produce them — never output a flat paragraph.
-- When the user asks for connectives and logical flow, use them explicitly.
-- When the user asks for explanations of terms, provide deep, detailed explanations. Expand concepts into their natural sub-components, but do NOT invent specific named software products unless in the input.
-- When the user asks for "telegraphic speech" — expand each keyword into a brief grammatical clause with articles and verb conjugations, joined by semicolons into one flowing sentence. No periods or line breaks between clauses.
-- Output ONLY the transformed text. No preamble or meta-commentary.`;
+Rules:
+- Follow ALL embedded instructions precisely
+- Produce structured output when requested
+- Expand concepts into sub-components when explaining terms
+- Output ONLY the transformed text, nothing else`;
 
     userContent = input.text;
   } else if (isRetry) {
@@ -233,14 +226,13 @@ async function validateTranslation(
     (input.sourceLanguage === 'auto' && input.targetLanguage === 'en');
 
   const systemPrompt = isSameLanguage
-    ? `You are a text transformation quality reviewer. The user provided text with transformation instructions (e.g., convert to essay, compress to keywords, extract items). Evaluate whether the output correctly follows those instructions.
+    ? `You are a text transformation quality reviewer. Evaluate whether the output correctly follows the user's instructions.
 
 Evaluate on these criteria:
-1. Instruction adherence: Did the output follow ALL the user's instructions (format, style, structure)?
-2. Structure: Does the output have the requested headings, subheadings, bullet points, or sections? (Flat paragraphs when structured output was requested = FAIL)
-3. Completeness: Is any information from the input missing?
-4. Quality: Is the output well-written with proper connectives, logical flow, and polish as requested?
-5. Depth: Are technical terms explained when requested? Are arguments developed with reasoning?
+1. Instruction adherence: Did the output follow the user's instructions?
+2. Structure: Does the output have requested headings, bullet points, sections?
+3. Completeness: Is any information missing?
+4. Quality: Is the output well-written?
 
 Respond in this exact JSON format:
 {
@@ -250,7 +242,7 @@ Respond in this exact JSON format:
   "suggestion": "optional improvement suggestion"
 }
 
-Be strict: if the output is a flat paragraph when the user asked for structured output with headings/bullet points, set isValid to false and qualityScore below 50.`
+If the output is good enough for practical use, set isValid to true even if minor improvements are possible.`
     : `You are a translation quality reviewer. Evaluate the provided translation and respond in JSON format.
 
 Evaluate on these criteria:
@@ -312,12 +304,9 @@ async function refineTranslation(
     (input.sourceLanguage === 'auto' && input.targetLanguage === 'en');
 
   const systemPrompt = isSameLanguage
-    ? `You are an expert text transformation assistant refining output to better match the user's instructions.
+    ? `You are an expert text transformation assistant refining output.
 Fix ALL the issues identified while preserving what already works.
-
-CRITICAL: If the user asked for structured output (headings, bullet points, sections) and the current output is a flat paragraph, you MUST restructure it with proper headings, subheadings, bullet points, and sections.
-If the user asked for argumentative connectives, add them: furthermore, consequently, therefore, however, moreover, nevertheless.
-If the user asked for explanations of terms, add detailed explanations.
+Produce structured output with headings and bullet points when requested.
 Output ONLY the improved transformed text, nothing else.`
     : `You are a professional translator refining a translation.
 Fix ALL the issues identified while keeping the rest of the translation unchanged.
