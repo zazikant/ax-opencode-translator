@@ -31,7 +31,7 @@ curl -X POST "https://ax-opencode-translator.vercel.app/api/translate" \
 ```bash
 curl -X POST "https://integrate.api.nvidia.com/v1/chat/completions" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer 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" \
+  -H "Authorization: Bearer YOUR_NVIDIA_API_KEY" \
   -d '{
     "model": "openai/gpt-oss-120b",
     "messages": [
