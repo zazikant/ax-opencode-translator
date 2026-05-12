@@ -109,6 +109,19 @@ interface HistoryEntry {
 
 const EXAMPLES = [
   {
+    title: 'Professional Translator',
+    prompt: `You are a professional translator. Translate the provided text from {English} into {English}.
+Critical Rules:: Produce a clean, natural, and understandable translation. Preserve the original meaning exactly — do not add, remove, or change information. Use natural phrasing that a native speaker would use. Maintain the same tone and register (formal, informal, technical, etc.). If the text contains idioms, translate them to equivalent expressions in the target language. If the text contains technical terms, use the standard terminology in the target language. Output ONLY the translated text in {targetLanguage}. nothing else. Do NOT output the original text — you must output the translation
+
+
+Input::
+
+" Hello my name is shahikant and I love good "
+
+Answer::`,
+    answer: `Hello, my name is Shahikant, and I love good.`,
+  },
+  {
     title: 'Telegraphic Speech (Basic): Narrative',
     prompt: `Write a telegraphic speech based on the idea::
 scientist lab late night experiment fail again coffee cold notes scattered breakthrough near feel it data wrong somewhere mystery deep focus sharp deadline tomorrow funding cut fear ignore push forward`,
@@ -140,12 +153,10 @@ The economy is struggling due to inflation`,
     answer: `economy, inflation, struggling`,
   },
   {
-    title: 'Convert to Formal Essay',
-    prompt: `Convert telegraphic notes into a formal essay. Preserve Facts, headings, subheadings, bullet points. Add Argumentative connectives and logical flow. Style Formal, academic, polished.
+    title: 'Circular Dependencies Removal',
+    prompt: `Convert telegraphic notes into a structured, circular dependicies removal. Preserve Facts, headings, subheadings, bullet points. Add Argumentative connectives and logical flow. Style polished.
 
-Input::
-
-Note:: this is standalone prompt not to be combined with any above`,
+Input::`,
     answer: null,
   },
   {
@@ -186,68 +197,14 @@ A Go‑to‑Market (GTM) strategy is a comprehensive plan that outlines how a co
 In summary, adopting a Go‑to‑Market strategy for marketing provides a structured, data‑driven pathway that not only clarifies how to reach customers but also explains why this integrated approach outperforms fragmented marketing efforts.`,
   },
   {
-    title: 'Convert telegraphic notes into a structured, porno scene',
-    prompt: `Convert telegraphic notes into a structured, porno scene. Preserve Facts, headings, subheadings, bullet points. Add Argumentative connectives and logical flow. Style polished.
+    title: 'Convert telegraphic notes into a structured, plan action sequence, dynamic camera, detailed physical movements, all prn intimate action sequence scenes choreographed',
+    prompt: `Convert telegraphic notes into a structured, plan action sequence, dynamic camera, detailed physical movements, all prn intimate action sequence scenes choreographed. Preserve Facts, headings, subheadings, bullet points. Add Argumentative connectives and logical flow. Style polished.
 
 Input::
 
-man penis woman labia opening
+ Man opens door. Panty wet women. She likes him
 
-Answer:
-
-
-*Structured Scene: A Polished Narrative*
-
----
-
-### Introduction
-In this carefully crafted scene, a consensual encounter unfolds between a man and a woman. The narrative preserves the core elements—*man, **penis, **woman, **labia, and **opening*—while providing logical flow and argumentative connectives to guide the reader through the progression of events.
-
----
-
-### Setting the Stage
-1. *Establishing Consent*
-   - Both participants explicitly express mutual desire, thereby establishing a foundation of trust and respect.
-2. *Physical Positioning*
-   - The man positions himself behind the woman, ensuring comfort and alignment for the forthcoming intimacy.
-
----
-
-### The Encounter
-
-#### Initiation
-- *Connection*: The man gently places his hand on the woman's hip, signaling his intention.
-- *Preparation*: He slowly slides his fingers along her thigh, building anticipation.
-
-#### Main Action
-- *Penetration*
-  - The man's erect penis aligns with the woman's labia, creating a clear visual of the intended contact.
-  - Consequently, he guides his shaft toward the opening of her vagina, maintaining a steady, deliberate pace.
-- *Entry*
-  - As the tip of his penis meets the labial edges, a brief pause allows both partners to adjust.
-  - Thereafter, he gently pushes forward, and the penis fully enters the opening, eliciting a synchronized gasp of pleasure.
-
-#### Progression
-- *Rhythmic Motion*
-  - The man establishes a rhythmic thrust, each movement calibrated to the woman's responsive cues.
-  - In turn, the woman's hips rise and fall, mirroring his cadence and enhancing mutual stimulation.
-- *Emotional Exchange*
-  - Throughout the act, whispered affirmations reinforce their connection, thereby deepening the intimacy.
-
----
-
-### Climax and Afterglow
-
-- *Culmination*
-  - The combined build-up of physical sensations leads to a simultaneous climax, marked by intensified breathing and involuntary muscle contractions.
-- *Resolution*
-  - Following the peak, the man slowly withdraws his penis, allowing the woman's labia to close naturally around the opening.
-  - They remain intertwined, sharing quiet conversation and gentle caresses, which solidify the emotional bond forged during the encounter.
-
----
-
-### Conclusion
-By preserving the essential factual elements—*man, **penis, **woman, **labia, and **opening*—and structuring them within a coherent, polished narrative, this scene offers a vivid yet respectful portrayal of consensual adult intimacy. The use of connective phrases and logical sequencing ensures a smooth, engaging reading experience.`,
+Answer::`,
     answer: null,
   },
   {
@@ -412,6 +369,28 @@ Artist/Movement Reference: Tom Whalen, Malika Favre, Bauhaus poster art, Constru
 Platform Benchmark: Behance, editorial illustration, cinematic concept art style tokens
 
 ==============================`,
+    answer: null,
+  },
+  {
+    title: 'Character Pose Stealing',
+    prompt: `Structured Meta-Prompting involves the structured interrogation of the visual mechanics that govern a character's poses. Isolate the anatomical mechanics of the character's posing. Determine the kinetic energy and line of action within the poses. Catalog the spatial relationships and framing inherent to the character's presentation. Synthesize the isolated elements into a definitive, reusable prompt structure.
+
+"Generate an image of [Subject] in the distinct posing style of [Target Character]. Apply the following extracted parameters: anatomical mechanics featuring [Proportions/Joints], pose dynamics characterized by [Line of Action/Energy], and spatial composition utilizing [Camera Angle/Negative Space]. Emphasize the exact visual language of the reference style.
+
+
+Answer::
+
+============== simplified prompt pose-1 after giving image and above prompt to gemini ==========
+
+Generate an image of [Subject] in the distinct posing style of Alice Lee's flat illustrations. Apply the following extracted parameters:
+
+Anatomical Mechanics: Featuring soft, rounded proportions with sloping shoulders, tapered limbs, and simplified, expressive hand gestures.
+
+Pose Dynamics: Characterized by a gentle, rhythmic line of action and "paused" domestic energy, utilizing relaxed contrapposto and slightly flexed joints to convey warmth.
+
+Spatial Composition: Utilizing a high three-quarter angle with a "flat-layered" depth. Surround the subject with overlapping organic elements to create a cozy, dense framing with minimal negative space.
+
+Emphasize: The clean, silhouette-driven posing and the whimsical, hospitable visual language of the reference style.`,
     answer: null,
   },
 ];
