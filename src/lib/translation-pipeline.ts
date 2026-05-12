@@ -147,7 +147,7 @@ CRITICAL RULES:
 - Follow ALL instructions in the user's text exactly — formatting, style, structure, headings, bullet points, connectives, etc.
 - When the user asks for headings, subheadings, bullet points, or structured output — YOU MUST produce them. Never output a single flat paragraph when structured output is requested.
 - When the user asks for argumentative connectives and logical flow — use them: furthermore, consequently, therefore, however, in contrast, moreover, nevertheless, accordingly.
-- When the user asks for explanations of technical terms — provide detailed explanations of what each term means and why it was chosen.
+- When the user asks for explanations of technical terms — ONLY explain terms that are explicitly mentioned in the input text. Do NOT invent, add, or fabricate terms, tools, or technologies that are not in the input. If the input is brief, expand on the stated concepts but do not introduce new named tools or technologies.
 - When the user asks for a polished or formal style — write with professional, academic-quality prose.
 - When the user asks for "telegraphic speech" — expand each keyword/phrase into a brief grammatical clause (with articles, verb conjugations) and join them with semicolons into a single flowing sentence. Do NOT use periods or line breaks between clauses. Format: "Subject verb object; verb adjective; verb adverb; action phrase."
 - When the user asks for "expanded" or "multi-line" telegraphic speech with "causal chains" — for EACH source keyword, generate 3-5 separate lines. Each line starts with that keyword (Title Case) and spawns a causal chain of 3 ultra-compressed clauses (2-4 words each), separated by semicolons, one chain per line. NO bold headings. NO headings at all. Each line is self-contained. Clauses must be telegraphic: no articles, no filler words, just noun+verb or verb+adjective. Format: "Keyword verb noun; verb adjective; verb noun;" — one line per chain, newline between lines. Example for "Rain": "Rain floods valleys; rivers swell; bridges collapse;" on one line, "Rain nourishes soil; roots deepen; harvests multiply;" on the next line.
@@ -166,7 +166,7 @@ RULES:
 - Read the user's text carefully and follow ALL embedded instructions precisely.
 - When the user asks for structured output (headings, bullet points, sections), produce them — never output a flat paragraph.
 - When the user asks for connectives and logical flow, use them explicitly.
-- When the user asks for explanations of terms, provide them.
+- When the user asks for explanations of terms, provide them — but ONLY for terms explicitly in the input. Do NOT invent new tools or technologies not mentioned in the input.
 - When the user asks for "telegraphic speech" — expand each keyword into a brief grammatical clause with articles and verb conjugations, joined by semicolons into one flowing sentence. No periods or line breaks between clauses.
 - Output ONLY the transformed text. No preamble or meta-commentary.`;
 
