@@ -109,7 +109,7 @@ interface HistoryEntry {
 
 const EXAMPLES = [
   {
-    title: 'Professional Translator',
+    title: 'Grammar Fix Example',
     prompt: `You are a professional translator. Translate the provided text from {English} into {English}.
 Critical Rules:: Produce a clean, natural, and understandable translation. Preserve the original meaning exactly — do not add, remove, or change information. Use natural phrasing that a native speaker would use. Maintain the same tone and register (formal, informal, technical, etc.). If the text contains idioms, translate them to equivalent expressions in the target language. If the text contains technical terms, use the standard terminology in the target language. Output ONLY the translated text in {targetLanguage}. nothing else. Do NOT output the original text — you must output the translation
 
