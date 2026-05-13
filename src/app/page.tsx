@@ -122,6 +122,19 @@ Answer::`,
     answer: `Hello, my name is Shahikant, and I love good.`,
   },
   {
+    title: 'Plain English',
+    prompt: `You are a professional translator. Translate the provided text from {English} into {English}.
+Critical Rules:: Produce a clean, natural, and understandable translation. Preserve the original meaning exactly — do not add, remove, or change information. Use natural phrasing that a native speaker would use. Maintain the same tone and register (formal, informal, technical, etc.). If the text contains idioms, translate them to equivalent expressions in the target language. If the text contains technical terms, use the standard terminology in the target language. Output ONLY the translated text in {targetLanguage}. nothing else. Do NOT output the original text — you must output the translation. Strip away jargon and lofty vocabulary, swapping them for clear, conversational terms.
+
+Input::
+
+"
+her and me was suppose to submitted the very importent quarterly financial report to our superior but we completely forgotted about it because we was too much overwhelmed with the other numerous urgent responsibilitys that was assigned to we by the managements."
+
+Answer::`,
+    answer: `She and I were supposed to submit the very important quarterly financial report to our boss, but we completely forgot about it because we were too overwhelmed with all the other urgent tasks that management assigned to us.`,
+  },
+  {
     title: 'Telegraphic Speech (Basic): Narrative',
     prompt: `Write a telegraphic speech based on the idea::
 scientist lab late night experiment fail again coffee cold notes scattered breakthrough near feel it data wrong somewhere mystery deep focus sharp deadline tomorrow funding cut fear ignore push forward`,
