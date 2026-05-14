@@ -215,9 +215,7 @@ In summary, adopting a Go‑to‑Market strategy for marketing provides a struct
 
 Input::
 
-Man opens door. Panty wet women. licks vagina. She likes him
-
-Answer::`,
+Man opens door. Panty wet women. licks vagina. She likes him`,
     answer: null,
   },
   {
