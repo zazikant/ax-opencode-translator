@@ -210,12 +210,12 @@ A Go‑to‑Market (GTM) strategy is a comprehensive plan that outlines how a co
 In summary, adopting a Go‑to‑Market strategy for marketing provides a structured, data‑driven pathway that not only clarifies how to reach customers but also explains why this integrated approach outperforms fragmented marketing efforts.`,
   },
   {
-    title: 'Convert telegraphic notes into a structured, plan action sequence, dynamic camera, detailed physical movements, all prn intimate action sequence scenes choreographed',
-    prompt: `Convert telegraphic notes into a structured, plan action sequence, dynamic camera, detailed physical movements, all prn intimate action sequence scenes choreographed. Preserve Facts, headings, subheadings, bullet points. Add Argumentative connectives and logical flow. Style polished.
+    title: 'Convert telegraphic notes into a structured, mental scenarios, plan action sequence, dynamic camera, detailed physical movements, all prn intimate action sequence scenes choreographed',
+    prompt: `Convert telegraphic notes into a structured, mental scenarios, plan action sequence, dynamic camera, detailed physical movements, all prn intimate action sequence scenes choreographed. Preserve Facts, headings, subheadings, bullet points. Add Argumentative connectives and logical flow. Style polished.
 
 Input::
 
- Man opens door. Panty wet women. She likes him
+Man opens door. Panty wet women. licks vagina. She likes him
 
 Answer::`,
     answer: null,
