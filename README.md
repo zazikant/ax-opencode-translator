@@ -1,5 +1,7 @@
 # Ax Translator
 
+Test with example to solve a complex thinking 
+
 ```bash
 curl -X POST "https://ax-opencode-translator.vercel.app/api/translate" \
   -H "Content-Type: application/json" \
