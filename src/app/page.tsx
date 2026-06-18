@@ -1134,13 +1134,18 @@ export default function AxTranslatorPage() {
                         className="gap-1.5"
                       >
                         <RefreshCw className="size-3" />
-                        Try Again
+                        Retry
                       </Button>
                     </div>
                   ) : (
-                    <div className="min-h-[200px] flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-6 text-center">
-                      <Sparkles className="size-8 text-muted-foreground/50" />
-                      <p className="text-sm text-muted-foreground">Translation will appear here</p>
+                    <div className="min-h-[200px] flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-6">
+                      <Languages className="size-8 text-muted-foreground/50" />
+                      <p className="text-sm text-muted-foreground text-center">
+                        Translation will appear here
+                      </p>
+                      <p className="text-xs text-muted-foreground/60 text-center max-w-[250px]">
+                        Supports up to 30K+ tokens. Large texts are auto-chunked and translated in parts.
+                      </p>
                     </div>
                   )}
                 </CardContent>
@@ -1150,76 +1155,180 @@ export default function AxTranslatorPage() {
             {/* Examples */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Example Prompts</CardTitle>
-                <CardDescription>Click an example to load it into the input</CardDescription>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Sparkles className="size-4 text-muted-foreground" />
+                  Prompt Examples
+                </CardTitle>
+                <CardDescription>
+                  Click each example to expand and copy the prompt
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {EXAMPLES.map((example, index) => (
+                  <Collapsible key={index} className="border rounded-lg">
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-between text-sm font-normal px-3 h-auto py-2"
+                      >
+                        <span className="truncate mr-2">{example.title}</span>
+                        <ChevronDown className="size-4 shrink-0 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="px-3 pb-3 space-y-2">
+                        <div className="bg-muted/50 rounded-md p-3 text-xs font-mono whitespace-pre-wrap">
+                          {example.prompt}
+                        </div>
+                        {example.answer && (
+                          <>
+                            <p className="text-xs text-muted-foreground font-medium">Answer:</p>
+                            <div className="bg-muted/50 rounded-md p-3 text-xs whitespace-pre-wrap">
+                              {example.answer}
+                            </div>
+                          </>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5 w-full"
+                          onClick={() => {
+                            setInputText(example.prompt);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                        >
+                          <Copy className="size-3" />
+                          Use this prompt
+                        </Button>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Photo Composition Notes */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Sparkles className="size-4 text-muted-foreground" />
+                  Photo Composition Notes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {[
+                  "if you don't have a scene, use a \"seed thought\" and generate a prompt with the \"Telegraphic Speech: Compression and exploration\" node.",
+                  "Split an 8‑word scene into two batches of four words each.",
+                  "Process each batch with a \"four‑word max\" seed thought to generate telegraphic speech using \"Telegraphic Speech: Compression and exploration\" node",
+                  "Concatenate the two telegraphic outputs and feed them into \"Tag-Based Prompts\" node",
+                  "Use the \"Sentence from Telegraphic Speech\" node to combine the tags into a final sentence.",
+                  "Pass that sentence to the \"Convert telegraphic notes into a structured, photo composition brief\" node.",
+                  "Extract only the \"objective and narrative\" fields from that node and send them to the \"Photo composition brief — Subject and Background\" node.",
+                  "first generate a general final image, then apply the \"style\" fingerprint prompt from \"Steal Art Style Fingerprint\" node. If that isn't satisfactory, try generating the final image together with the style prompt concatenated.",
+                ].map((note, index) => (
+                  <div key={index} className="border rounded-lg p-3 text-sm bg-muted/50">
+                    {note}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Pipeline Explanation */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Info className="size-4 text-muted-foreground" />
+                  How the Pipeline Works
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  {EXAMPLES.map((example, i) => (
-                    <Button
-                      key={i}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInputText(example.prompt)}
-                      className="h-auto py-2 px-3 text-xs justify-start text-left whitespace-normal"
-                    >
-                      {example.title}
-                    </Button>
-                  ))}
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div className="space-y-2 p-4 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <div className="size-6 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-bold">1</div>
+                      <p className="text-sm font-medium">Translate</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      GLM 5.1 translates your text with a carefully compiled prompt. Large texts are auto-chunked at ~6K token boundaries.
+                    </p>
+                  </div>
+                  <div className="space-y-2 p-4 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <div className="size-6 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center text-xs font-bold">2</div>
+                      <p className="text-sm font-medium">Validate</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      A separate LLM call evaluates accuracy, fluency, and completeness. Quality score and issues are reported per chunk.
+                    </p>
+                  </div>
+                  <div className="space-y-2 p-4 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <div className="size-6 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center text-xs font-bold">3</div>
+                      <p className="text-sm font-medium">Refine</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      If validation finds issues, a surgical fix prompt is compiled (DSPy-style) targeting only the problems. Up to 2 refinements.
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* ─── History Tab ────────────────────────────────────────────── */}
+          {/* ─── History Tab ─────────────────────────────────────────────── */}
           <TabsContent value="history" className="mt-6">
             <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-base">Translation History</CardTitle>
-                    <CardDescription>Your last {history.length} translations (this session only)</CardDescription>
-                  </div>
-                  {history.length > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setHistory([])}
-                      className="gap-1.5"
-                    >
-                      Clear all
-                    </Button>
-                  )}
-                </div>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <History className="size-4" />
+                  Translation History
+                </CardTitle>
+                <CardDescription>
+                  Your recent translations in this session (not persisted)
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {history.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    No translations yet. Your history will appear here.
-                  </p>
+                  <div className="flex flex-col items-center justify-center py-12 gap-3">
+                    <History className="size-8 text-muted-foreground/50" />
+                    <p className="text-sm text-muted-foreground">No translations yet</p>
+                    <p className="text-xs text-muted-foreground/60">Your translation history will appear here</p>
+                  </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
                     {history.map((entry) => (
                       <div
                         key={entry.id}
-                        className="rounded-lg border p-3 space-y-2 cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => {
-                          setResult(entry.result);
-                          setInputText(entry.input);
-                          setSourceLanguage(entry.sourceLanguage);
-                          setTargetLanguage(entry.targetLanguage);
-                        }}
+                        className="flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
                       >
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>{entry.sourceLanguage} → {entry.targetLanguage}</span>
-                          <span>{new Date(entry.timestamp).toLocaleTimeString()}</span>
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <p className="text-sm font-medium truncate">
+                            {entry.input}
+                            {entry.input.length >= 100 ? '...' : ''}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>
+                              {LANGUAGES.find((l) => l.value === entry.sourceLanguage)?.label || entry.sourceLanguage}
+                            </span>
+                            <ArrowRightLeft className="size-3" />
+                            <span>
+                              {LANGUAGES.find((l) => l.value === entry.targetLanguage)?.label || entry.targetLanguage}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {entry.result.translatedText}
+                          </p>
                         </div>
-                        <p className="text-sm line-clamp-2">{entry.input}</p>
-                        <div className="flex items-center gap-2 text-xs">
-                          <Badge variant="outline" className="text-[10px]">Q: {entry.result.qualityScore}%</Badge>
-                          {entry.result.refinements > 0 && (
-                            <Badge variant="outline" className="text-[10px]">{entry.result.refinements} ref.</Badge>
-                          )}
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <Badge
+                            variant={getScoreVariant(entry.result.qualityScore)}
+                            className="text-[10px]"
+                          >
+                            {entry.result.qualityScore}%
+                          </Badge>
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(entry.timestamp).toLocaleTimeString()}
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -1231,30 +1340,60 @@ export default function AxTranslatorPage() {
         </Tabs>
       </main>
 
-      <footer className="border-t py-4 px-4 text-center text-xs text-muted-foreground">
-        <p>Ax Translator — Powered by GLM 5.1 via OpenCode AI</p>
+      {/* Footer */}
+      <footer className="border-t mt-auto">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between text-xs text-muted-foreground">
+          <span>Ax Translator — DSPy-like Translation Pipeline</span>
+          <span>Powered by GLM 5.1</span>
+        </div>
       </footer>
     </div>
   );
 }
 
-// Helper function for chunking
+// ─── Chunking Utility ────────────────────────────────────────────────────────
+// Splits text into chunks at paragraph/sentence boundaries, each under maxTokens.
+
 function splitIntoChunks(text: string, maxTokens: number): string[] {
-  const maxChars = maxTokens * 4;
+  const paragraphs = text.split(/\n\n+/);
   const chunks: string[] = [];
-  const paragraphs = text.split(/\n\s*\n/);
   let currentChunk = '';
 
   for (const para of paragraphs) {
-    if ((currentChunk + para).length > maxChars && currentChunk.length > 0) {
+    const paraTokens = estimateTokens(para);
+    const currentTokens = estimateTokens(currentChunk);
+
+    // If a single paragraph exceeds max, split by sentences
+    if (paraTokens > maxTokens) {
+      if (currentChunk.trim()) {
+        chunks.push(currentChunk.trim());
+        currentChunk = '';
+      }
+      const sentences = para.split(/(?<=[.!?])\s+/);
+      for (const sentence of sentences) {
+        const sentTokens = estimateTokens(sentence);
+        const currTokens = estimateTokens(currentChunk);
+        if (currTokens + sentTokens > maxTokens && currentChunk.trim()) {
+          chunks.push(currentChunk.trim());
+          currentChunk = sentence + ' ';
+        } else {
+          currentChunk += sentence + ' ';
+        }
+      }
+      continue;
+    }
+
+    if (currentTokens + paraTokens > maxTokens && currentChunk.trim()) {
       chunks.push(currentChunk.trim());
-      currentChunk = para;
+      currentChunk = para + '\n\n';
     } else {
-      currentChunk += (currentChunk ? '\n\n' : '') + para;
+      currentChunk += para + '\n\n';
     }
   }
+
   if (currentChunk.trim()) {
     chunks.push(currentChunk.trim());
   }
-  return chunks;
+
+  return chunks.length > 0 ? chunks : [text];
 }
