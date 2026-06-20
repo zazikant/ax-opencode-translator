@@ -2,6 +2,17 @@
 
 Test with example to solve a complex thinking 
 
+## Prompt Examples
+
+The web UI ships with several prebuilt prompt examples, including:
+
+- **Ad-Strategy Landscape Mapper** — exhaustive audience + pillar mining for any product/service
+- **Paid-Media Segmentation Strategist** — atomic pillar / audience matrix for ad campaigns
+- **Character Pose Stealing** — structured visual mechanics for image prompts
+- **Plain English** / **Grammar Fix** — same-language text transformation
+
+## API
+
 ```bash
 curl -X POST "https://ax-opencode-translator.vercel.app/api/translate" \
   -H "Content-Type: application/json" \
