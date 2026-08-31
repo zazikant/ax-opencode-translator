@@ -1,19 +1,19 @@
 /**
- * GLM 5.1 API Client — OpenAI Chat Completions interface
+ * GLM 5.x API Client — OpenAI Chat Completions interface
  *
- * Calls the GLM 5.1 model via the OpenAI-compatible chat completions endpoint.
+ * Calls the GLM model via the OpenAI-compatible chat completions endpoint.
  * Uses system + user message format (same as OpenAI SDK).
  *
  * Base URL: https://opencode.ai/zen/go
- * Default model: glm-5.1
+ * Default model: glm-5.1 (alias — currently routes to GLM-5.3 on the gateway)
  * Endpoint: /v1/chat/completions (OpenAI-compatible)
  * Auth: Authorization: Bearer header
  *
- * GLM 5.1 is a thinking/reasoning model. We disable thinking via
- * reasoning_effort: "none" — this turns off internal reasoning so ALL
- * max_tokens go to content output. This prevents the "empty content" bug
- * where reasoning consumes all tokens. Quality is maintained through the
- * detailed system prompt in translation-pipeline.ts.
+ * GLM 5.3 (released 2026-08-18) is a thinking-only model — reasoning cannot be
+ * disabled. We use reasoning_effort: "low" to keep latency/cost low while still
+ * producing the final answer in `content`. The parser also reads
+ * `reasoning_content` as a safety fallback if the gateway ever returns content
+ * there.
  */
 
 const LLM_BASE_URL = 'https://opencode.ai/zen/go';
@@ -43,11 +43,11 @@ export interface LLMChatResponse {
 }
 
 /**
- * Build the request body for GLM 5.1.
- * reasoning_effort: "none" disables internal reasoning so all tokens go to content.
- * This prevents the "empty content" bug where reasoning consumes all max_tokens.
- * Quality is maintained through the detailed system prompt which guides the model.
- * This is a string parameter — integer values are rejected by the gateway.
+ * Build the request body for GLM 5.x.
+ * reasoning_effort: "low" — GLM 5.3 (currently served behind glm-5.1) is thinking-only
+ * and rejects "none". "low" keeps reasoning overhead minimal so most tokens still go
+ * to the actual content output. The system prompt in translation-pipeline.ts guides
+ * quality.
  */
 function buildRequestBody(
   model: string,
@@ -60,7 +60,7 @@ function buildRequestBody(
     messages,
     max_tokens: maxTokens,
     temperature,
-    reasoning_effort: 'none',
+    reasoning_effort: 'low',
     stream: false,
   };
 }
@@ -95,8 +95,8 @@ export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMCha
 
     const data = await response.json();
     const message = data.choices?.[0]?.message;
-    // GLM 5.1 returns reasoning in reasoning_content and the final answer in content.
-    // If content is empty (token limit hit during reasoning), fall back to reasoning_content.
+    // GLM 5.3 returns the final answer in content and reasoning in reasoning_content.
+    // Fallback to reasoning_content for safety if content is empty (e.g., token limit hit).
     const content = message?.content || message?.reasoning_content || '';
 
     if (!content) {
@@ -120,7 +120,8 @@ export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMCha
 /**
  * Convenience: Call with system prompt + user content + API key.
  * This is the primary way the pipeline calls the LLM.
- * Thinking is disabled (reasoning_effort: "none") so all tokens go to output.
+ * Uses reasoning_effort: "low" — GLM 5.3 is thinking-only, so we keep reasoning
+ * minimal to preserve latency/cost while still getting the final answer in content.
  */
 export async function callLLM(
   systemPrompt: string,
@@ -162,8 +163,8 @@ export async function callLLM(
 
     const data = await response.json();
     const message = data.choices?.[0]?.message;
-    // With reasoning_effort: "none", content should always be populated.
-    // Fallback to reasoning_content just in case the gateway ignores the param.
+    // With reasoning_effort: "low", content should be populated.
+    // Fallback to reasoning_content just in case the gateway behaves unexpectedly.
     const content = message?.content || message?.reasoning_content || '';
 
     if (!content) {
