@@ -14,7 +14,17 @@
  * producing the final answer in `content`. The parser also reads
  * `reasoning_content` as a safety fallback if the gateway ever returns content
  * there.
+ *
+ * Session routing:
+ * Per https://opencode.ai/docs/go/#where-can-i-use-it, the gateway requires an
+ * `x-opencode-session` header for request routing. Enforcement tightened on
+ * 2026-09-06; requests without it now return HTTP 400 with
+ * `MissingSessionID`. We generate a stable UUID per pipeline run and reuse it
+ * across all calls in the same pipeline so the gateway can apply prompt-cache
+ * affinity. A fresh UUID is generated if the caller doesn't supply one.
  */
+
+import { randomUUID } from 'node:crypto';
 
 const LLM_BASE_URL = 'https://opencode.ai/zen/go';
 const DEFAULT_MODEL = 'glm-5.1';
@@ -30,6 +40,7 @@ export interface LLMChatOptions {
   temperature?: number;
   maxTokens?: number;
   apiKey: string; // Required — always pass explicitly
+  sessionId?: string; // Stable per-conversation ID for OpenCode routing/cache affinity
 }
 
 export interface LLMChatResponse {
@@ -67,6 +78,7 @@ function buildRequestBody(
 
 export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMChatResponse> {
   const model = options.model || DEFAULT_MODEL;
+  const sessionId = options.sessionId || randomUUID();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 50_000); // 50s — leaves 10s buffer for Vercel's 60s maxDuration
 
@@ -76,6 +88,7 @@ export async function llmChatCompletion(options: LLMChatOptions): Promise<LLMCha
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${options.apiKey}`,
+        'x-opencode-session': sessionId,
       },
       body: JSON.stringify(buildRequestBody(
         model,
@@ -129,9 +142,11 @@ export async function callLLM(
   apiKey: string,
   model?: string,
   maxTokens: number = 4096,
-  temperature: number = 0.3
+  temperature: number = 0.3,
+  sessionId?: string
 ): Promise<string> {
   const modelName = model || DEFAULT_MODEL;
+  const resolvedSessionId = sessionId || randomUUID();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 50_000); // 50s — leaves 10s buffer for Vercel's 60s maxDuration
 
@@ -141,6 +156,7 @@ export async function callLLM(
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
+        'x-opencode-session': resolvedSessionId,
       },
       body: JSON.stringify(buildRequestBody(
         modelName,

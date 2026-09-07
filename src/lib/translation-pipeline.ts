@@ -21,6 +21,7 @@
  */
 
 import { callLLM, DEFAULT_MODEL } from './llm-client';
+import { randomUUID } from 'node:crypto';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -120,7 +121,7 @@ Source: ${input.text.substring(0, 200)}... → ${input.targetLanguage}`;
 
 // ─── Activity 1: translateText ───────────────────────────────────────────────
 
-async function translateText(input: TranslationRequest, isRetry: boolean = false): Promise<{ translatedText: string; model: string }> {
+async function translateText(input: TranslationRequest, isRetry: boolean = false, sessionId?: string): Promise<{ translatedText: string; model: string }> {
   const srcLabel = input.sourceLanguage === 'auto' ? 'the detected source language' : input.sourceLanguage;
   const targetLabel = input.targetLanguage;
 
@@ -199,7 +200,7 @@ Rules:
 
   // Use higher temperature for same-language transformation (more creative/structured output)
   const temperature = isSameLanguage ? 0.5 : 0.3;
-  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, maxTokens, temperature);
+  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, maxTokens, temperature, sessionId);
 
   // Strip any markdown code blocks or quotes the LLM might add
   const cleaned = result
@@ -220,7 +221,8 @@ Rules:
 
 async function validateTranslation(
   input: TranslationRequest,
-  translatedText: string
+  translatedText: string,
+  sessionId?: string
 ): Promise<{ isValid: boolean; qualityScore: number; issues: string[]; suggestion?: string }> {
   const isSameLanguage = input.sourceLanguage === input.targetLanguage ||
     (input.sourceLanguage === 'auto' && input.targetLanguage === 'en');
@@ -273,7 +275,7 @@ ${translatedText}
 """`;
 
   // With reasoning_effort "none", 1024 is enough for validation JSON response
-  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 1024, 0.1);
+  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, 1024, 0.1, sessionId);
 
   try {
     const jsonMatch = result.match(/\{[\s\S]*\}/);
@@ -297,7 +299,8 @@ ${translatedText}
 async function refineTranslation(
   input: TranslationRequest,
   translatedText: string,
-  issues: string[]
+  issues: string[],
+  sessionId?: string
 ): Promise<string> {
   const issuesList = issues.map(i => `- ${i}`).join('\n');
   const isSameLanguage = input.sourceLanguage === input.targetLanguage ||
@@ -326,7 +329,7 @@ ${translatedText}
 Issues found with the current translation:
 ${issuesList}`;
 
-  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, calculateMaxTokens(translatedText, isSameLanguage), 0.2);
+  const result = await callLLM(systemPrompt, userContent, input.apiKey, input.model, calculateMaxTokens(translatedText, isSameLanguage), 0.2, sessionId);
 
   return result
     .replace(/^```[\w]*\n?/m, '')
@@ -341,12 +344,13 @@ ${issuesList}`;
 export async function runFastTranslation(input: TranslationRequest): Promise<TranslationResult> {
   console.log('[Pipeline] Fast mode: translate only (no validate/refine)');
 
+  const sessionId = randomUUID();
   let translatedText = '';
   let model = input.model || DEFAULT_MODEL;
   const pipeline: string[] = ['fast-translate'];
 
   try {
-    const result = await translateText(input);
+    const result = await translateText(input, false, sessionId);
     translatedText = result.translatedText;
     model = result.model;
 
@@ -354,7 +358,7 @@ export async function runFastTranslation(input: TranslationRequest): Promise<Tra
     if (isEcho(input.text, translatedText) && input.sourceLanguage !== input.targetLanguage) {
       console.log('[Pipeline] Echo detected in fast mode — retrying...');
       pipeline.push('echo-detected', 'fast-retry');
-      const retryResult = await translateText(input, true);
+      const retryResult = await translateText(input, true, sessionId);
       translatedText = retryResult.translatedText;
     }
   } catch (err: unknown) {
@@ -389,6 +393,7 @@ export async function runFastTranslation(input: TranslationRequest): Promise<Tra
 export async function runTranslationPipeline(input: TranslationRequest): Promise<TranslationResult> {
   console.log(`[Pipeline] Full pipeline: src=${input.sourceLanguage}, target=${input.targetLanguage}, text length=${input.text.length}`);
 
+  const sessionId = randomUUID();
   let attempt = 0;
   let refinements = 0;
   const maxRefinements = 2;
@@ -408,7 +413,7 @@ export async function runTranslationPipeline(input: TranslationRequest): Promise
     pipeline.push('translate');
 
     try {
-      const result = await translateText(input);
+      const result = await translateText(input, false, sessionId);
       translatedText = result.translatedText;
       model = result.model;
 
@@ -419,7 +424,7 @@ export async function runTranslationPipeline(input: TranslationRequest): Promise
         attempt++;
         pipeline.push('translate-retry');
 
-        const retryResult = await translateText(input, true);
+        const retryResult = await translateText(input, true, sessionId);
         translatedText = retryResult.translatedText;
 
         // If still echoing after retry, note it but continue to validation
@@ -444,7 +449,7 @@ export async function runTranslationPipeline(input: TranslationRequest): Promise
         console.log(`[Pipeline] Translate retry context: ${fixContext.substring(0, 200)}`);
 
         try {
-          const result = await translateText(input, true);
+          const result = await translateText(input, true, sessionId);
           translatedText = result.translatedText;
           model = result.model;
 
@@ -488,7 +493,7 @@ export async function runTranslationPipeline(input: TranslationRequest): Promise
     pipeline.push('validate');
 
     try {
-      const validation = await validateTranslation(input, translatedText);
+      const validation = await validateTranslation(input, translatedText, sessionId);
       qualityScore = validation.qualityScore;
       issues = validation.issues;
 
@@ -526,12 +531,12 @@ export async function runTranslationPipeline(input: TranslationRequest): Promise
     console.log(`[Pipeline] Refinement #${refinements} context: ${fixContext.substring(0, 200)}`);
 
     try {
-      translatedText = await refineTranslation(input, translatedText, issues);
+      translatedText = await refineTranslation(input, translatedText, issues, sessionId);
 
       // Re-validate after refinement
       pipeline.push(`revalidate-${refinements}`);
       try {
-        const revalidation = await validateTranslation(input, translatedText);
+        const revalidation = await validateTranslation(input, translatedText, sessionId);
         qualityScore = revalidation.qualityScore;
         issues = revalidation.issues;
 
