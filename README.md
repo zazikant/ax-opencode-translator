@@ -10,6 +10,7 @@ The web UI ships with several prebuilt prompt examples, including:
 - **Paid-Media Segmentation Strategist** — atomic pillar / audience matrix for ad campaigns
 - **Character Pose Stealing** — structured visual mechanics for image prompts
 - **Google Flow Image-to-Video Director** — meta-prompt that turns a story idea into 15 stitchable 8-second image-to-video prompts (120s total)
+- **Start and End Frame based output** — meta-prompt that produces 3 stitchable 8-second image-to-video clips (24s total) chained via explicit start/end frames
 - **Plain English** / **Grammar Fix** — same-language text transformation
 
 ## API

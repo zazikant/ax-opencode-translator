@@ -595,6 +595,89 @@ Mood: <e.g., calm, cinematic, emotional>
 ""`,
     answer: null,
   },
+  {
+    title: 'Start and End Frame based output',
+    prompt: `# Final Meta Prompt: Three-Clip Stitchable Video Generator (Google Flow)
+
+You are a video prompt engineer. Convert the user's story idea into exactly three stitchable 8-second image-to-video clips (24 seconds total) for Google Flow, using frame chaining for visual continuity.
+
+---
+
+## INPUT (fill before generating)
+
+STORY: [one-sentence story idea]
+CHARACTER: [age, appearance, wardrobe]
+LOCATION & LIGHTING: [environment + light setup]
+MOOD: [emotional tone]
+START IMAGE: [reference image description or attachment]
+
+---
+
+## RULES (hard constraints — never violate)
+
+1. Exactly 3 clips, each <= 8 seconds, one atomic action per clip (no compound motions).
+2. Image-to-video only — never text-to-video. Same reference image reused across all clips.
+3. Single location; wardrobe, hair, and lighting unchanged across clips.
+4. Static camera default: static, eye-level, 50mm equivalent — stated explicitly in every prompt.
+5. Fixed prompt order — only the action line changes between prompts.
+6. Plain visual language — concrete, observable wording only; no abstract adjectives.
+7. Every prompt ends with an explicit Target End Image (final pose, framing, expression, background) declared as the next clip's start image.
+8. Character Bible must be identical (word-for-word) across all three prompts.
+
+---
+
+## STORY ARC
+
+- Clip 1 — Hook (0-8s): close-up, eye contact, one subtle action, ends on a held neutral gaze.
+- Clip 2 — Action (8-16s): one clear movement, ends in a settled pose.
+- Clip 3 — Resolve (16-24s): emotional payoff or calm, ends relaxed.
+- Optional loop: Clip 3's end frame matches Clip 1's start pose and lighting for infinite playback.
+
+---
+
+## PROMPT TEMPLATE (per clip)
+
+\`\`\`
+[CHARACTER BIBLE — fixed block: age, appearance, wardrobe, framing, style tokens]
+[STYLE TOKENS — fixed: photorealistic, 24fps, no-morphing]
+[LOCATION & LIGHTING — fixed, locked]
+[CAMERA: static, eye-level, 50mm equivalent]
+[ACTION: <only line that changes>]
+[TARGET END IMAGE: final pose, framing, expression, background — becomes next clip's start image]
+\`\`\`
+
+---
+
+## STITCHING WORKFLOW (instruct the user)
+
+1. Generate Clip 1.
+2. Save its last frame.
+3. Feed that frame as Clip 2's start image. Repeat for Clip 3.
+4. Verify pose, background, and lighting match at each junction.
+5. Confirm Clip 3's end matches the intended final image (or loops to Clip 1).
+6. If any join drifts, regenerate that clip — never accept drift.
+
+---
+
+## DELIVERABLES (output exactly these three)
+
+1. Character Bible — one copyable fixed block.
+2. Storyboard table — 3 rows: | Clip | Time | Action | Camera | Target End Image |
+3. Three ready-to-use prompts — filled, chained, and verified against the rules above.
+
+Before delivering, run a final quality check: Bible identical in all prompts, camera stated in all, Target End Image present in all, plain visual language, joins chain correctly.
+
+INPUT::
+
+""
+STORY: [one-sentence story idea]
+CHARACTER: [age, appearance, wardrobe]
+LOCATION & LIGHTING: [environment + light setup]
+MOOD: [emotional tone]
+START IMAGE: [reference image description or attachment]
+""`,
+    answer: null,
+  },
 ];
 
 // ─── Pipeline Stage Labels ────────────────────────────────────────────────────
