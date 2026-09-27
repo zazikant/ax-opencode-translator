@@ -9,6 +9,7 @@ The web UI ships with several prebuilt prompt examples, including:
 - **Ad-Strategy Landscape Mapper** — exhaustive audience + pillar mining for any product/service
 - **Paid-Media Segmentation Strategist** — atomic pillar / audience matrix for ad campaigns
 - **Character Pose Stealing** — structured visual mechanics for image prompts
+- **Google Flow Image-to-Video Director** — meta-prompt that turns a story idea into 15 stitchable 8-second image-to-video prompts (120s total)
 - **Plain English** / **Grammar Fix** — same-language text transformation
 
 ## API
