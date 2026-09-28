@@ -886,7 +886,7 @@ export default function AxTranslatorPage() {
           qualityScore: Math.round(totalQuality / chunks.length),
           attempts: totalAttempts,
           refinements: totalRefinements,
-          model: 'glm-5.3-flash',
+          model: 'glm-5.2',
           pipeline: [`chunked-${chunks.length}`],
         };
         setResult(combinedResult);
