@@ -5,7 +5,7 @@
  * Uses system + user message format (same as OpenAI SDK).
  *
  * Base URL: https://opencode.ai/zen/go
- * Default model: glm-5.1 (alias — currently routes to GLM-5.3 on the gateway)
+ * Default model: glm-5.3-flash (glm-5.1 was deprecated by OpenCode on 2026-09-28)
  * Endpoint: /v1/chat/completions (OpenAI-compatible)
  * Auth: Authorization: Bearer header
  *
@@ -27,7 +27,7 @@
 import { randomUUID } from 'node:crypto';
 
 const LLM_BASE_URL = 'https://opencode.ai/zen/go';
-const DEFAULT_MODEL = 'glm-5.1';
+const DEFAULT_MODEL = 'glm-5.3-flash';
 
 export interface LLMChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -55,7 +55,7 @@ export interface LLMChatResponse {
 
 /**
  * Build the request body for GLM 5.x.
- * reasoning_effort: "low" — GLM 5.3 (currently served behind glm-5.1) is thinking-only
+ * reasoning_effort: "low" — GLM 5.3 is thinking-only
  * and rejects "none". "low" keeps reasoning overhead minimal so most tokens still go
  * to the actual content output. The system prompt in translation-pipeline.ts guides
  * quality.
