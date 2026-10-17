@@ -116,7 +116,7 @@ Critical Rules:: Produce a clean, natural, and understandable translation. Prese
 
 Input::
 
-" Hello my name is shahikant and I love good "
+"" Hello my name is shahikant and I love good ""
 
 Answer::`,
     answer: `Hello, my name is Shahikant, and I love good.`,
@@ -128,48 +128,67 @@ Critical Rules:: Produce a clean, natural, and understandable translation. Prese
 
 Input::
 
-"
-her and me was suppose to submitted the very importent quarterly financial report to our superior but we completely forgotted about it because we was too much overwhelmed with the other numerous urgent responsibilitys that was assigned to we by the managements."
+""
+her and me was suppose to submitted the very importent quarterly financial report to our superior but we completely forgotted about it because we was too much overwhelmed with the other numerous urgent responsibilitys that was assigned to we by the managements.
+""
 
 Answer::`,
     answer: `She and I were supposed to submit the very important quarterly financial report to our boss, but we completely forgot about it because we were too overwhelmed with all the other urgent tasks that management assigned to us.`,
   },
   {
     title: 'Telegraphic Speech (Basic): Narrative',
-    prompt: `Write a telegraphic speech based on the idea::
-scientist lab late night experiment fail again coffee cold notes scattered breakthrough near feel it data wrong somewhere mystery deep focus sharp deadline tomorrow funding cut fear ignore push forward`,
+    prompt: `Write a telegraphic speech based on the idea.
+
+Input::
+
+"" scientist lab late night experiment fail again coffee cold notes scattered breakthrough near feel it data wrong somewhere mystery deep focus sharp deadline tomorrow funding cut fear ignore push forward ""`,
     answer: `Scientist in the lab, late night; experiment fails again; coffee is cold; notes scattered; breakthrough feels near; data wrong somewhere; mystery deep; focus sharp; deadline tomorrow; funding cut; fear ignored; push forward.`,
   },
   {
     title: 'Tag-Based Prompts',
-    prompt: `Use tag-based prompts only. No grammar, no connectives, double colon separator, just core visual/semantic tokens ::\n  ::\ncouple glasses winter coats selfie snow mountains alpine valley chalets blue sky clouds snowing warm smiles`,
+    prompt: `Use tag-based prompts only. No grammar, no connectives, double colon separator, just core visual/semantic tokens.
+
+Input::
+
+"" couple glasses winter coats selfie snow mountains alpine valley chalets blue sky clouds snowing warm smiles ""`,
     answer: `couple :: glasses :: winter coats :: selfie :: snow mountains :: alpine valley :: chalets :: blue sky :: clouds :: snowing :: warm smiles`,
   },
   {
     title: 'Extract Action Items',
-    prompt: `Extract only action items::
-The team needs to finish the report, schedule a meeting, and send invoices by Friday`,
+    prompt: `Extract only action items.
+
+Input::
+
+"" The team needs to finish the report, schedule a meeting, and send invoices by Friday ""`,
     answer: `- Finish the report
 - Schedule a meeting
 - Send invoices by Friday`,
   },
   {
     title: 'Sentence from Telegraphic Speech',
-    prompt: `Write sentence from Telegraphic speech idea::
-A man apple hungry eats`,
+    prompt: `Write sentence from Telegraphic speech idea.
+
+Input::
+
+"" A man apple hungry eats ""`,
     answer: `A hungry man eats an apple.`,
   },
   {
     title: 'Compress to Keywords',
-    prompt: `Compress to keywords::
-The economy is struggling due to inflation`,
+    prompt: `Compress to keywords.
+
+Input::
+
+"" The economy is struggling due to inflation ""`,
     answer: `economy, inflation, struggling`,
   },
   {
     title: 'Circular Dependencies Removal',
     prompt: `Convert telegraphic notes into a structured, circular dependicies removal. Preserve Facts, headings, subheadings, bullet points. Add Argumentative connectives and logical flow. Style polished.
 
-Input::`,
+Input::
+
+"" <your telegraphic notes here> ""`,
     answer: null,
   },
   {
@@ -177,7 +196,8 @@ Input::`,
     prompt: `Convert telegraphic notes that describes a structured scene. For each technical term, tool, or technology mentioned, explain what it is and why it was chosen instead of other options. Preserve facts, headings, subheadings, bullet points. Add argumentative connectives and logical flow. Style polished.
 
 Input::
-Go to Market strategy for marketing
+
+"" Go to Market strategy for marketing ""
 
 Answer:
 
@@ -215,7 +235,7 @@ In summary, adopting a Go‑to‑Market strategy for marketing provides a struct
 
 Input::
 
-Man opens door. Panty wet women. licks vagina. She likes him`,
+"" Man opens door. Panty wet women. licks vagina. She likes him ""`,
     answer: null,
   },
   {
@@ -224,7 +244,7 @@ Man opens door. Panty wet women. licks vagina. She likes him`,
 
 Input::
 
-Write your scene.
+"" Write your scene. ""
 
 Answer:
 
@@ -241,7 +261,7 @@ Convert telegraphic notes into a structured photo composition brief with two sec
 
 Input::
 
-
+""
 *Objective:* Capture quiet intensity and introspection of an aged chess enthusiast playing alone in public.
 
 *Narrative Flow*
@@ -250,7 +270,7 @@ Input::
 3. Highlight conflict – empty opponent's chair creates visual tension, sparks curiosity.
 4. Convey emotion – contemplative posture, focused expression signal concentration and melancholy.
 5. Resolve visual story – image leaves audience pondering the solitary game's backstory.
-
+""
 
 Answer:
 
@@ -273,13 +293,11 @@ Answer:
   },
   {
     title: 'Telegraphic Speech: Compression and exploration',
-    prompt: `Write a telegraphic speech about::
-Climate change
-Rising temperatures; melting ice caps; extreme weather spikes.
-CO₂ emissions soaring; fossil fuels dominate; oceans acidify.
-Deforestation accelerates; biodiversity collapses; sea levels climb.
-Urgent action required: slash emissions, shift to renewables, reforest, enforce climate policies.
-Future of humanity hangs in the balance.`,
+    prompt: `Write a telegraphic speech about climate change.
+
+Input::
+
+"" Climate change. Rising temperatures; melting ice caps; extreme weather spikes. CO₂ emissions soaring; fossil fuels dominate; oceans acidify. Deforestation accelerates; biodiversity collapses; sea levels climb. Urgent action required: slash emissions, shift to renewables, reforest, enforce climate policies. Future of humanity hangs in the balance. ""`,
     answer: null,
   },
   {
@@ -288,7 +306,7 @@ Future of humanity hangs in the balance.`,
 
 Input::
 
-Silence. Shadows. Heartbeat. Surrender.
+"" Silence. Shadows. Heartbeat. Surrender. ""
 
 Answer:
 
