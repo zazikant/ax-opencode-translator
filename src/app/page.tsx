@@ -937,7 +937,7 @@ export default function AxTranslatorPage() {
           if (!response.ok) {
             const errMsg = data.error || `Translation failed on chunk ${i + 1}/${chunks.length}`;
             if (errMsg.includes('timeout')) {
-              setError(`Chunk ${i + 1} timed out. GLM 5.1 is a thinking model — try shorter input or fewer terms per chunk.`);
+              setError(`Chunk ${i + 1} timed out. GLM 5.3 is a thinking model — try shorter input or fewer terms per chunk.`);
             } else {
               setError(errMsg);
             }
@@ -972,7 +972,7 @@ export default function AxTranslatorPage() {
           qualityScore: Math.round(totalQuality / chunks.length),
           attempts: totalAttempts,
           refinements: totalRefinements,
-          model: 'glm-5.2',
+          model: 'glm-5.3',
           pipeline: [`chunked-${chunks.length}`],
         };
         setResult(combinedResult);
@@ -1005,7 +1005,7 @@ export default function AxTranslatorPage() {
         if (!response.ok) {
           // Check for Vercel timeout specifically
           if (response.status === 504 || (data.error && data.error.includes('timeout'))) {
-            setError('Translation timed out. GLM 5.1 is a thinking model that takes time for complex transformations. Try using fewer terms or shorter input text.');
+            setError('Translation timed out. GLM 5.3 is a thinking model that takes time for complex transformations. Try using fewer terms or shorter input text.');
           } else {
             setError(data.error || 'Translation failed');
           }
@@ -1117,13 +1117,13 @@ export default function AxTranslatorPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight">Ax Translator</h1>
-              <p className="text-xs text-muted-foreground">DSPy-like translation pipeline powered by GLM 5.1</p>
+              <p className="text-xs text-muted-foreground">DSPy-like translation pipeline powered by GLM 5.3</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="gap-1 text-xs">
               <Zap className="size-3" />
-              GLM 5.1
+              GLM 5.3
             </Badge>
           </div>
         </div>
@@ -1363,7 +1363,7 @@ export default function AxTranslatorPage() {
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {currentStage === 'chunking' && 'Splitting text into manageable chunks...'}
-                          {currentStage === 'translate' && 'Sending to GLM 5.1...'}
+                          {currentStage === 'translate' && 'Sending to GLM 5.3...'}
                           {currentStage === 'validate' && 'Checking translation quality...'}
                           {currentStage === 'refine' && 'Improving translation based on feedback...'}
                         </p>
@@ -1580,7 +1580,7 @@ export default function AxTranslatorPage() {
                       <p className="text-sm font-medium">Translate</p>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      GLM 5.1 translates your text with a carefully compiled prompt. Large texts are auto-chunked at ~6K token boundaries.
+                      GLM 5.3 translates your text with a carefully compiled prompt. Large texts are auto-chunked at ~6K token boundaries.
                     </p>
                   </div>
                   <div className="space-y-2 p-4 rounded-lg bg-muted/50">
@@ -1675,7 +1675,7 @@ export default function AxTranslatorPage() {
       <footer className="border-t mt-auto">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between text-xs text-muted-foreground">
           <span>Ax Translator — DSPy-like Translation Pipeline</span>
-          <span>Powered by GLM 5.1</span>
+          <span>Powered by GLM 5.3</span>
         </div>
       </footer>
     </div>

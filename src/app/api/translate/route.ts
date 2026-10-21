@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     };
 
     // ─── Pipeline Mode Selection ───────────────────────────────────────────
-    // GLM 5.1 is a thinking model — each LLM call takes 15-30s.
+    // GLM 5.3 is a thinking model — each LLM call takes 15-30s.
     // Full pipeline (translate → validate → refine) = 2-5 sequential calls
     // = 60-150s total, which exceeds Vercel's 60s maxDuration.
     //
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     // - Default (fast undefined or fast=true) → fast mode (single translate call)
     //
     // Fast mode produces excellent quality because the same-language
-    // transformation prompts are rich and guide GLM 5.1 well.
+    // transformation prompts are rich and guide GLM 5.3 well.
     const useFastMode = fast !== false;
 
     if (useFastMode) {

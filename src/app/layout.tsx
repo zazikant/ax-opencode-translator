@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Ax Translator — DSPy-like Translation Pipeline",
-  description: "Translate text to clean, understandable language using a DSPy-inspired pipeline powered by GLM 5.1.",
+  description: "Translate text to clean, understandable language using a DSPy-inspired pipeline powered by GLM 5.3.",
   keywords: ["Ax Translator", "DSPy", "translation", "GLM", "LLM", "TypeScript"],
   authors: [{ name: "Ax Translator" }],
   icons: {
