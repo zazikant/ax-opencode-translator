@@ -126,9 +126,7 @@ Answer::`,
 Critical Rules:: Produce a clean, natural, and understandable translation. Preserve the original meaning exactly — do not add, remove, or change information. Use natural phrasing that a native speaker would use. Maintain the same tone and register (formal, informal, technical, etc.). If the text contains idioms, translate them to equivalent expressions in the target language. If the text contains technical terms, use the standard terminology in the target language. Output ONLY the translated text in {targetLanguage}. nothing else. Do NOT output the original text — you must output the translation. Strip away jargon and lofty vocabulary, swapping them for clear, conversational terms.
 
 Input::
-""
-her and me was suppose to submitted the very importent quarterly financial report to our superior but we completely forgotted about it because we was too much overwhelmed with the other numerous urgent responsibilitys that was assigned to we by the managements.
-""
+""her and me was suppose to submitted the very importent quarterly financial report to our superior but we completely forgotted about it because we was too much overwhelmed with the other numerous urgent responsibilitys that was assigned to we by the managements.""
 
 Answer::`,
     answer: `She and I were supposed to submit the very important quarterly financial report to our boss, but we completely forgot about it because we were too overwhelmed with all the other urgent tasks that management assigned to us.`,
@@ -249,16 +247,14 @@ Convert telegraphic notes into a structured photo composition brief with two sec
 - light, color, texture, motion, mood, sensory.
 
 Input::
-""
-*Objective:* Capture quiet intensity and introspection of an aged chess enthusiast playing alone in public.
+""*Objective:* Capture quiet intensity and introspection of an aged chess enthusiast playing alone in public.
 
 *Narrative Flow*
 1. Establish setting – outdoor café, relaxed public backdrop.
 2. Introduce subject – solitary elderly player draws eye.
 3. Highlight conflict – empty opponent's chair creates visual tension, sparks curiosity.
 4. Convey emotion – contemplative posture, focused expression signal concentration and melancholy.
-5. Resolve visual story – image leaves audience pondering the solitary game's backstory.
-""
+5. Resolve visual story – image leaves audience pondering the solitary game's backstory.""
 
 Answer:
 
@@ -505,12 +501,9 @@ context on that audience's daily pressure/incentive relevant to that
 ONE pillar only.
 
 INPUT::
-
-""
-Audience segments: Site engineers, project owners/investors, contractors, government/compliance bodies
+""Audience segments: Site engineers, project owners/investors, contractors, government/compliance bodies
 Candidate pillars: Safety, Quality, Cost control, Timeline, Design, Compliance
-Product/service: PMC (Project Management Consultancy) services for construction projects
-""`,
+Product/service: PMC (Project Management Consultancy) services for construction projects""`,
     answer: null,
   },
   {
@@ -586,13 +579,10 @@ Stitching rules baked into the prompts:
 - [ ] Last clip loops back to first clip's opening frame
 
 INPUT::
-
-""
-Story idea: <one paragraph or a few sentences>
+""Story idea: <one paragraph or a few sentences>
 Character: <age, hair, eyes, build, wardrobe — or paste the reference image description>
 Location: <primary location(s)>
-Mood: <e.g., calm, cinematic, emotional>
-""`,
+Mood: <e.g., calm, cinematic, emotional>""`,
     answer: null,
   },
   {
@@ -668,14 +658,11 @@ START IMAGE: [reference image description or attachment]
 Before delivering, run a final quality check: Bible identical in all prompts, camera stated in all, Target End Image present in all, plain visual language, joins chain correctly.
 
 INPUT::
-
-""
-STORY: [one-sentence story idea]
+""STORY: [one-sentence story idea]
 CHARACTER: [age, appearance, wardrobe]
 LOCATION & LIGHTING: [environment + light setup]
 MOOD: [emotional tone]
-START IMAGE: [reference image description or attachment]
-""`,
+START IMAGE: [reference image description or attachment]""`,
     answer: null,
   },
   {
