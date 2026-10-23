@@ -115,7 +115,7 @@ Critical Rules:: Produce a clean, natural, and understandable translation. Prese
 
 
 Input::
-"" Hello my name is shahikant and I love good ""
+""Hello my name is shahikant and I love good""
 
 Answer::`,
     answer: `Hello, my name is Shahikant, and I love good.`,
@@ -138,7 +138,7 @@ Answer::`,
     prompt: `Write a telegraphic speech based on the idea.
 
 Input::
-"" scientist lab late night experiment fail again coffee cold notes scattered breakthrough near feel it data wrong somewhere mystery deep focus sharp deadline tomorrow funding cut fear ignore push forward ""`,
+""scientist lab late night experiment fail again coffee cold notes scattered breakthrough near feel it data wrong somewhere mystery deep focus sharp deadline tomorrow funding cut fear ignore push forward""`,
     answer: `Scientist in the lab, late night; experiment fails again; coffee is cold; notes scattered; breakthrough feels near; data wrong somewhere; mystery deep; focus sharp; deadline tomorrow; funding cut; fear ignored; push forward.`,
   },
   {
@@ -146,7 +146,7 @@ Input::
     prompt: `Use tag-based prompts only. No grammar, no connectives, double colon separator, just core visual/semantic tokens.
 
 Input::
-"" couple glasses winter coats selfie snow mountains alpine valley chalets blue sky clouds snowing warm smiles ""`,
+""couple glasses winter coats selfie snow mountains alpine valley chalets blue sky clouds snowing warm smiles""`,
     answer: `couple :: glasses :: winter coats :: selfie :: snow mountains :: alpine valley :: chalets :: blue sky :: clouds :: snowing :: warm smiles`,
   },
   {
@@ -154,7 +154,7 @@ Input::
     prompt: `Extract only action items.
 
 Input::
-"" The team needs to finish the report, schedule a meeting, and send invoices by Friday ""`,
+""The team needs to finish the report, schedule a meeting, and send invoices by Friday""`,
     answer: `- Finish the report
 - Schedule a meeting
 - Send invoices by Friday`,
@@ -164,7 +164,7 @@ Input::
     prompt: `Write sentence from Telegraphic speech idea.
 
 Input::
-"" A man apple hungry eats ""`,
+""A man apple hungry eats""`,
     answer: `A hungry man eats an apple.`,
   },
   {
@@ -172,7 +172,7 @@ Input::
     prompt: `Compress to keywords.
 
 Input::
-"" The economy is struggling due to inflation ""`,
+""The economy is struggling due to inflation""`,
     answer: `economy, inflation, struggling`,
   },
   {
@@ -180,7 +180,7 @@ Input::
     prompt: `Convert telegraphic notes into a structured, circular dependicies removal. Preserve Facts, headings, subheadings, bullet points. Add Argumentative connectives and logical flow. Style polished.
 
 Input::
-"" <your telegraphic notes here> ""`,
+""<your telegraphic notes here>""`,
     answer: null,
   },
   {
@@ -188,7 +188,7 @@ Input::
     prompt: `Convert telegraphic notes that describes a structured scene. For each technical term, tool, or technology mentioned, explain what it is and why it was chosen instead of other options. Preserve facts, headings, subheadings, bullet points. Add argumentative connectives and logical flow. Style polished.
 
 Input::
-"" Go to Market strategy for marketing ""
+""Go to Market strategy for marketing""
 
 Answer:
 
@@ -225,7 +225,7 @@ In summary, adopting a Go‑to‑Market strategy for marketing provides a struct
     prompt: `Convert telegraphic notes into a structured, mental scenarios, plan action sequence, dynamic camera, detailed physical movements, all prn intimate action sequence scenes choreographed. Preserve Facts, headings, subheadings, bullet points. Add Argumentative connectives and logical flow. Style polished.
 
 Input::
-"" Man opens door. Panty wet women. licks vagina. She likes him ""`,
+""Man opens door. Panty wet women. licks vagina. She likes him""`,
     answer: null,
   },
   {
@@ -233,7 +233,7 @@ Input::
     prompt: `Convert telegraphic notes into a structured, photo composition brief. Preserve Facts, headings, subheadings, bullet points. Add Argumentative connectives and logical flow. Style polished.
 
 Input::
-"" Write your scene. ""
+""Write your scene.""
 
 Answer:
 
@@ -284,7 +284,7 @@ Answer:
     prompt: `Write a telegraphic speech about.
 
 Input::
-"" Climate change ""`,
+""Climate change""`,
     answer: null,
   },
   {
@@ -292,7 +292,7 @@ Input::
     prompt: `Convert telegraphic notes into an expanded, multi-line telegraphic speech — each source idea spawns 3–5 new causal chains, maintaining 6–8 words per line, semicolon-separated, no filler. Preserve Facts, headings, subheadings, bullet points. Add Argumentative connectives and logical flow. Style polished.
 
 Input::
-"" Silence. Shadows. Heartbeat. Surrender. ""
+""Silence. Shadows. Heartbeat. Surrender.""
 
 Answer:
 
@@ -435,7 +435,7 @@ Context: <two sentences describing what it does, why these audiences purchase it
 **Critical**: If you provide fewer than eight audiences or eight pillars, the task is considered failed. Expand the lists until the minimum is met.
 
 Input::
-"" Construction pmc ""`,
+""Construction pmc""`,
     answer: null,
   },
   {
